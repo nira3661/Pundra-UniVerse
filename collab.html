@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Collab Hub · Pundra UniVerse (PUB Hub)</title>
+  <meta name="description" content="Find teammates for student projects at Pundra University: open pitches, one-click applications and team workspaces.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#1f4d3a">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&amp;family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/watermark.css">
+
+  <!-- Step 3 scripts: Supabase JS v2 (CDN), then the PUB Hub modules. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="js/supabaseClient.js" defer></script>
+  <script src="js/auth.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body data-page="collab">
+  <!-- Viewer watermark: js/auth.js replaces these tiles with the signed-in
+       user's email and session timestamp, sized to the screen. -->
+  <div class="watermark" id="watermark" aria-hidden="true">
+    <div class="watermark__layer" id="watermark-layer">
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+    </div>
+  </div>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="index.html" aria-label="Pundra UniVerse home">
+        <span class="brand__mark" aria-hidden="true">PUB</span>
+        <span class="brand__text">
+          <strong>Pundra UniVerse</strong>
+          <small>PUB Hub</small>
+        </span>
+      </a>
+
+      <nav class="site-nav" aria-label="Main">
+        <ul>
+          <li><a href="index.html">Spotlight</a></li>
+          <li><a href="collab.html" aria-current="page">Collab Hub</a></li>
+          <li><a href="feedback.html">Campus Board</a></li>
+          <li><a href="hall-of-fame.html">Hall of Fame</a></li>
+        </ul>
+      </nav>
+
+      <div class="site-header__actions">
+        <button type="button" class="icon-btn" id="theme-toggle" aria-pressed="false" aria-label="Use dark theme" title="Switch colour theme">
+          <span aria-hidden="true">&#9680;</span>
+        </button>
+        <button type="button" class="user-chip member-only" id="profile-button" data-open-dialog="profile-dialog" aria-haspopup="dialog" aria-label="Open your builder profile">
+          <span class="avatar" id="user-initials" aria-hidden="true">NR</span>
+          <span class="user-chip__text">
+            <span id="user-name">Nusrat Rahman</span>
+            <small id="user-meta">CSE &middot; Batch 2023</small>
+          </span>
+        </button>
+        <button type="button" class="btn btn--ghost btn--sm member-only" id="sign-out-button">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main" id="main">
+    <!-- Restricted access: shown when body[data-auth="guest"] (set by js/auth.js). -->
+    <section class="auth-gate" id="auth-gate" aria-labelledby="auth-title">
+      <div class="card auth-card">
+        <div class="auth-card__intro">
+          <p class="eyebrow">Campus members only</p>
+          <h2 id="auth-title">Sign in to PUB Hub</h2>
+          <p>Pitches, the Campus Board and team workspaces are open to verified Pundra University members. Use your university email.</p>
+        </div>
+
+        <div class="segmented segmented--block" role="tablist" aria-label="Account">
+          <button type="button" role="tab" id="tab-login" aria-selected="true" aria-controls="login-panel">Sign in</button>
+          <button type="button" role="tab" id="tab-signup" aria-selected="false" aria-controls="signup-panel" tabindex="-1">Create account</button>
+        </div>
+
+        <div id="login-panel" role="tabpanel" aria-labelledby="tab-login">
+        <form class="form" id="login-form" novalidate>
+          <div class="field">
+            <label for="login-email">University email</label>
+            <input type="email" id="login-email" name="email" autocomplete="email" placeholder="you@pub.ac.bd" required>
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" name="password" autocomplete="current-password" required>
+          </div>
+          <div class="auth-card__row">
+            <button type="button" class="text-btn" id="forgot-password">Forgot password?</button>
+            <button type="submit" class="btn btn--primary">Sign in</button>
+          </div>
+        </form>
+        </div>
+
+        <div id="signup-panel" role="tabpanel" aria-labelledby="tab-signup" hidden>
+        <form class="form" id="signup-form" novalidate>
+          <div class="field">
+            <label for="signup-name">Full name</label>
+            <input type="text" id="signup-name" name="full_name" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="signup-email">University email</label>
+            <input type="email" id="signup-email" name="email" autocomplete="email" placeholder="you@pub.ac.bd" aria-describedby="signup-email-hint" required>
+            <p class="hint" id="signup-email-hint">Accounts are limited to .edu and .ac.bd addresses. We&rsquo;ll send a link to verify it.</p>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="signup-department">Department</label>
+              <select id="signup-department" name="department" required>
+              <option value="" disabled selected>Choose department</option>
+              <option value="CSE">Computer Science &amp; Engineering (CSE)</option>
+              <option value="EEE">Electrical &amp; Electronic Engineering (EEE)</option>
+              <option value="CIV">Civil Engineering</option>
+              <option value="ARC">Architecture</option>
+              <option value="BBA">Business Administration (BBA)</option>
+              <option value="ENG">English</option>
+              <option value="LAW">Law</option>
+              <option value="ECO">Economics</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="signup-batch">Batch year</label>
+              <input type="number" id="signup-batch" name="batch_year" inputmode="numeric" min="2000" max="2035" placeholder="2024" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="signup-password">Password</label>
+            <input type="password" id="signup-password" name="password" autocomplete="new-password" minlength="8" aria-describedby="signup-password-hint" required>
+            <p class="hint" id="signup-password-hint">At least 8 characters.</p>
+          </div>
+          <button type="submit" class="btn btn--accent btn--block">Create account</button>
+        </form>
+        </div>
+
+        <p class="form-message" id="auth-message" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <div class="app-content">
+      <section class="container page-hero" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Collab Hub</p>
+          <h1 id="page-title">Find your team. <em>Build</em> the thing.</h1>
+          <p class="lede">Every pitch lists its scope, open roles and stack. Apply in one click with your builder profile; when the lead accepts you, the team workspace unlocks.</p>
+        </div>
+        <div class="page-hero__actions">
+          <button type="button" class="btn btn--accent" data-open-dialog="pitch-dialog" aria-haspopup="dialog">Pitch a project</button>
+          <a class="btn btn--ghost" href="#workspaces">My workspaces</a>
+        </div>
+      </section>
+
+      <div class="container">
+        <section class="section" aria-labelledby="pitches-title">
+          <div class="feed__toolbar">
+            <h2 class="section-title" id="pitches-title">Open pitches</h2>
+            <form class="toolbar-form" id="pitch-search" role="search">
+              <label class="visually-hidden" for="pitch-query">Search pitches</label>
+              <input type="search" id="pitch-query" name="q" placeholder="Search by title or tech">
+              <label class="visually-hidden" for="pitch-status">Pitch status</label>
+              <select id="pitch-status" name="status">
+                <option value="all">All statuses</option>
+                <option value="open">Recruiting</option>
+                <option value="review">Reviewing</option>
+                <option value="full">Team full</option>
+              </select>
+            </form>
+          </div>
+          <div class="chip-group filter-row" id="role-filter" role="group" aria-label="Filter by open role">
+            <button type="button" class="chip" data-filter="all" aria-pressed="true">All roles</button>
+            <button type="button" class="chip" data-filter="uiux" aria-pressed="false">UI/UX</button>
+            <button type="button" class="chip" data-filter="frontend" aria-pressed="false">Frontend</button>
+            <button type="button" class="chip" data-filter="backend" aria-pressed="false">Backend</button>
+            <button type="button" class="chip" data-filter="mobile" aria-pressed="false">Mobile</button>
+            <button type="button" class="chip" data-filter="ml" aria-pressed="false">ML / Data</button>
+          </div>
+
+          <!-- PROJECT_PITCHES grid. Sample cards below are replaced by js/app.js. -->
+          <div class="card-grid" id="pitch-grid" aria-live="polite" aria-busy="false">
+            <article class="card pitch-card" data-id="pitch-1" data-status="open" data-roles="uiux frontend backend">
+              <header class="card__header">
+                <span class="status status--open">Recruiting</span>
+                <span class="card__meta">2 of 4 seats open</span>
+              </header>
+              <h3 class="card__title">CampusEats &mdash; canteen pre-order app</h3>
+              <p class="card__byline">Lead: <a class="person-link" href="#">Nusrat Rahman</a> &middot; CSE 2023</p>
+              <p class="card__body"><strong>Scope:</strong> Order from the main canteen before class ends and pick up without the queue. MVP: menu, cart, pickup code, and a screen for canteen staff.</p>
+              <h4 class="micro-title">Roles</h4>
+              <ul class="role-list">
+                <li><span class="role">UI/UX</span></li>
+                <li><span class="role role--filled">Frontend<span class="visually-hidden"> (filled)</span></span></li>
+                <li><span class="role">Backend</span></li>
+              </ul>
+              <h4 class="micro-title">Tech stack</h4>
+              <ul class="tag-list">
+                <li class="tag tag--plain">Flutter</li>
+                <li class="tag tag--plain">Supabase</li>
+                <li class="tag tag--plain">Figma</li>
+              </ul>
+              <footer class="card__footer">
+                <span class="card__meta">7 applicants</span>
+                <button type="button" class="btn btn--primary btn--sm" data-open-dialog="apply-dialog" data-pitch-id="pitch-1" aria-haspopup="dialog">Apply</button>
+              </footer>
+            </article>
+
+            <article class="card pitch-card" data-id="pitch-2" data-status="open" data-roles="frontend backend">
+              <header class="card__header">
+                <span class="status status--open">Recruiting</span>
+                <span class="card__meta">2 of 3 seats open</span>
+              </header>
+              <h3 class="card__title">LabSlot &mdash; book lab equipment by the hour</h3>
+              <p class="card__byline">Lead: <a class="person-link" href="#">Mahmudul Hasan</a> &middot; EEE 2022</p>
+              <p class="card__body"><strong>Scope:</strong> Reserve oscilloscopes and dev boards in 1-hour slots, with a waiting list and quick damage reports for lab assistants.</p>
+              <h4 class="micro-title">Roles</h4>
+              <ul class="role-list">
+                <li><span class="role">Frontend</span></li>
+                <li><span class="role">Backend</span></li>
+              </ul>
+              <h4 class="micro-title">Tech stack</h4>
+              <ul class="tag-list">
+                <li class="tag tag--plain">HTML/CSS/JS</li>
+                <li class="tag tag--plain">PostgreSQL</li>
+              </ul>
+              <footer class="card__footer">
+                <span class="card__meta">3 applicants</span>
+                <button type="button" class="btn btn--primary btn--sm" data-open-dialog="apply-dialog" data-pitch-id="pitch-2" aria-haspopup="dialog">Apply</button>
+              </footer>
+            </article>
+
+            <article class="card pitch-card" data-id="pitch-3" data-status="review" data-roles="ml backend uiux">
+              <header class="card__header">
+                <span class="status status--review">Reviewing</span>
+                <span class="card__meta">1 of 3 seats open</span>
+              </header>
+              <h3 class="card__title">Bangla OCR for old exam papers</h3>
+              <p class="card__byline">Lead: <a class="person-link" href="#">Ayesha Siddiqua</a> &middot; CSE 2021</p>
+              <p class="card__body"><strong>Scope:</strong> Digitise ten years of scanned question papers so the library can search them. Needs a model fine-tuned on Bangla print.</p>
+              <h4 class="micro-title">Roles</h4>
+              <ul class="role-list">
+                <li><span class="role">ML / Data</span></li>
+                <li><span class="role role--filled">Backend<span class="visually-hidden"> (filled)</span></span></li>
+                <li><span class="role role--filled">UI/UX<span class="visually-hidden"> (filled)</span></span></li>
+              </ul>
+              <h4 class="micro-title">Tech stack</h4>
+              <ul class="tag-list">
+                <li class="tag tag--plain">Python</li>
+                <li class="tag tag--plain">PyTorch</li>
+                <li class="tag tag--plain">Tesseract</li>
+              </ul>
+              <footer class="card__footer">
+                <span class="card__meta">12 applicants</span>
+                <button type="button" class="btn btn--primary btn--sm" data-open-dialog="apply-dialog" data-pitch-id="pitch-3" aria-haspopup="dialog">Apply</button>
+              </footer>
+            </article>
+
+            <article class="card pitch-card" data-id="pitch-4" data-status="full" data-roles="mobile backend uiux">
+              <header class="card__header">
+                <span class="status status--full">Team full</span>
+                <span class="card__meta">0 of 4 seats open</span>
+              </header>
+              <h3 class="card__title">Alumni Mentor Match</h3>
+              <p class="card__byline">Lead: <a class="person-link" href="#">Imran Hossain</a> &middot; BBA 2022</p>
+              <p class="card__body"><strong>Scope:</strong> Pairs final-year students with alumni in their field for a monthly 30-minute call. Pilot runs with the BBA department.</p>
+              <h4 class="micro-title">Roles</h4>
+              <ul class="role-list">
+                <li><span class="role role--filled">Mobile<span class="visually-hidden"> (filled)</span></span></li>
+                <li><span class="role role--filled">Backend<span class="visually-hidden"> (filled)</span></span></li>
+                <li><span class="role role--filled">UI/UX<span class="visually-hidden"> (filled)</span></span></li>
+              </ul>
+              <h4 class="micro-title">Tech stack</h4>
+              <ul class="tag-list">
+                <li class="tag tag--plain">Kotlin</li>
+                <li class="tag tag--plain">Firebase</li>
+              </ul>
+              <footer class="card__footer">
+                <span class="card__meta">Applications closed</span>
+                <button type="button" class="btn btn--ghost btn--sm" disabled>Team full</button>
+              </footer>
+            </article>
+          </div>
+
+          <div class="empty-state" id="pitch-empty" hidden>
+            <h3>No pitches match</h3>
+            <p>Try another role, or pitch your own project.</p>
+          </div>
+        </section>
+
+        <section class="section" id="workspaces" aria-labelledby="workspaces-title">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title" id="workspaces-title">Team workspaces</h2>
+              <p class="muted">Discussion and tasks for teams you lead or have joined.</p>
+            </div>
+            <p class="watermark-note">This area carries your email watermark</p>
+          </div>
+
+          <div class="workspace">
+            <nav class="workspace__list" aria-label="Your workspaces">
+              <ul id="workspace-list">
+                <li><a class="workspace-link" href="#workspace" aria-current="true" data-pitch-id="pitch-1"><strong>CampusEats</strong><small>Lead &middot; 4 members</small></a></li>
+                <li><a class="workspace-link" href="#workspace" data-pitch-id="pitch-2"><strong>LabSlot</strong><small>Member &middot; 3 members</small></a></li>
+                <li><span class="workspace-link workspace-link--locked"><strong>Bangla OCR</strong><small>Application pending</small></span></li>
+              </ul>
+            </nav>
+
+            <section class="card workspace__thread" id="workspace" aria-labelledby="thread-title">
+              <header class="workspace__head">
+                <div>
+                  <p class="eyebrow">Workspace</p>
+                  <h3 id="thread-title">CampusEats &mdash; canteen pre-order app</h3>
+                </div>
+                <ul class="avatar-stack" aria-label="Team members: Nusrat, Tanvir, Farhana, Rakib">
+                  <li class="avatar" title="Nusrat Rahman">NR</li>
+                  <li class="avatar avatar--accent" title="Tanvir Ahmed">TA</li>
+                  <li class="avatar avatar--gold" title="Farhana Akter">FA</li>
+                  <li class="avatar avatar--info" title="Rakib Hasan">RH</li>
+                </ul>
+              </header>
+
+              <!-- WORKSPACE_MESSAGES (live via Supabase Realtime) -->
+              <ol class="message-list" id="message-list" aria-label="Team discussion" aria-live="polite">
+                <li class="message message--system">Farhana Akter joined as Frontend &middot; Mon</li>
+                <li class="message">
+                  <span class="avatar avatar--accent" aria-hidden="true">TA</span>
+                  <div class="message__bubble">
+                    <p class="message__meta"><strong>Tanvir</strong> &middot; <time datetime="2026-11-18T10:24">10:24</time></p>
+                    <p>Pushed the menu screen to the dev branch. Can someone check price formatting on small phones?</p>
+                  </div>
+                </li>
+                <li class="message message--own">
+                  <span class="avatar" aria-hidden="true">NR</span>
+                  <div class="message__bubble">
+                    <p class="message__meta"><strong>You</strong> &middot; <time datetime="2026-11-18T10:31">10:31</time></p>
+                    <p>Checking now. The canteen manager also wants a daily sales total &mdash; adding it to the task list.</p>
+                  </div>
+                </li>
+                <li class="message">
+                  <span class="avatar avatar--gold" aria-hidden="true">FA</span>
+                  <div class="message__bubble">
+                    <p class="message__meta"><strong>Farhana</strong> &middot; <time datetime="2026-11-18T10:40">10:40</time></p>
+                    <p>I&rsquo;ll take the pickup-code screen. Figma link is on the task.</p>
+                  </div>
+                </li>
+              </ol>
+
+              <form class="composer" id="message-form">
+                <label class="visually-hidden" for="message-input">Message your team</label>
+                <textarea id="message-input" name="message_text" rows="1" maxlength="1000" placeholder="Write to your team&hellip;" required></textarea>
+                <button type="submit" class="btn btn--primary">Send</button>
+              </form>
+            </section>
+
+            <div class="workspace__side">
+              <section class="card" aria-labelledby="tasks-title">
+                <h3 id="tasks-title">Task checklist</h3>
+                <p class="progress-label"><span id="task-progress-text">2 of 5 done</span><span>40%</span></p>
+                <progress id="task-progress" max="5" value="2" aria-labelledby="task-progress-text">2 of 5</progress>
+                <ul class="checklist" id="task-list">
+                  <li><label class="check"><input type="checkbox" checked><span class="check__text">Wireframes for order flow<small>Nusrat</small></span></label></li>
+                  <li><label class="check"><input type="checkbox" checked><span class="check__text">Menu screen<small>Tanvir</small></span></label></li>
+                  <li><label class="check"><input type="checkbox"><span class="check__text">Pickup-code screen<small>Farhana</small></span></label></li>
+                  <li><label class="check"><input type="checkbox"><span class="check__text">Daily sales total for staff<small>Unassigned</small></span></label></li>
+                  <li><label class="check"><input type="checkbox"><span class="check__text">Test on three low-end phones<small>Unassigned</small></span></label></li>
+                </ul>
+                <form class="inline-form" id="task-form">
+                  <label class="visually-hidden" for="task-input">New task</label>
+                  <input type="text" id="task-input" name="task" maxlength="120" placeholder="Add a task" required>
+                  <button type="submit" class="btn btn--ghost btn--sm">Add</button>
+                </form>
+              </section>
+
+              <!-- Visible to the Project Lead of the selected pitch only -->
+              <section class="card" id="applications-panel" aria-labelledby="applications-title" data-requires-role="lead">
+                <h3 id="applications-title">Applications <span class="count-badge">2<span class="visually-hidden"> waiting</span></span></h3>
+                <ul class="application-list" id="application-list">
+                  <li class="application" data-application-id="app-1">
+                    <div class="application__who">
+                      <span class="avatar avatar--info" aria-hidden="true">RH</span>
+                      <div><strong>Rakib Hasan</strong><small>CSE 2024 &middot; Backend</small></div>
+                    </div>
+                    <p class="application__msg">I&rsquo;ve built two REST APIs on Supabase for course projects. Free most weekday evenings.</p>
+                    <div class="application__actions">
+                      <button type="button" class="btn btn--primary btn--sm" data-action="accept">Accept</button>
+                      <button type="button" class="btn btn--ghost btn--sm" data-action="reject">Decline</button>
+                    </div>
+                  </li>
+                  <li class="application" data-application-id="app-2">
+                    <div class="application__who">
+                      <span class="avatar avatar--accent" aria-hidden="true">MA</span>
+                      <div><strong>Mim Akter</strong><small>Architecture 2023 &middot; UI/UX</small></div>
+                    </div>
+                    <p class="application__msg">I design posters and app screens for the Architecture club. Portfolio is on my profile.</p>
+                    <div class="application__actions">
+                      <button type="button" class="btn btn--primary btn--sm" data-action="accept">Accept</button>
+                      <button type="button" class="btn btn--ghost btn--sm" data-action="reject">Decline</button>
+                    </div>
+                  </li>
+                </ul>
+              </section>
+            </div>
+          </div>
+
+          <div class="empty-state" id="workspace-empty" hidden>
+            <h3>No workspaces yet</h3>
+            <p>A workspace unlocks when a project lead accepts your application.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p><strong>Pundra UniVerse</strong> &middot; PUB Hub &mdash; for verified Pundra University members.</p>
+      <nav aria-label="Footer">
+        <ul>
+          <li><a href="index.html">Spotlight</a></li>
+          <li><a href="collab.html">Collab Hub</a></li>
+          <li><a href="feedback.html">Campus Board</a></li>
+          <li><a href="hall-of-fame.html">Hall of Fame</a></li>
+        </ul>
+      </nav>
+      <p class="site-footer__note">Campus Board posts lock after 20 days and are deleted after 60 days unless an admin keeps them. Anonymous posts are never linked to your account.</p>
+    </div>
+  </footer>
+
+  <div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
+
+  <!-- Pitch card template for js/app.js -->
+  <template id="pitch-card-template">
+    <article class="card pitch-card" data-id="" data-status="" data-roles="">
+      <img class="card__thumb" alt="" loading="lazy" hidden>
+      <header class="card__header">
+        <span class="status" data-field="status"></span>
+        <span class="card__meta" data-field="seats"></span>
+      </header>
+      <h3 class="card__title" data-field="title"></h3>
+      <p class="card__byline">Lead: <a class="person-link" href="#" data-field="lead"></a> &middot; <span data-field="lead_meta"></span></p>
+      <p class="card__body"><strong>Scope:</strong> <span data-field="description"></span></p>
+      <h4 class="micro-title">Roles</h4>
+      <ul class="role-list" data-field="roles_needed"></ul>
+      <h4 class="micro-title">Tech stack</h4>
+      <ul class="tag-list" data-field="tech_stack"></ul>
+      <footer class="card__footer">
+        <span class="card__meta" data-field="applicants"></span>
+        <button type="button" class="btn btn--primary btn--sm" data-open-dialog="apply-dialog" aria-haspopup="dialog">Apply</button>
+      </footer>
+    </article>
+  </template>
+
+  <!-- Message template for js/app.js -->
+  <template id="message-template">
+    <li class="message">
+      <span class="avatar" aria-hidden="true"></span>
+      <div class="message__bubble">
+        <p class="message__meta"><strong data-field="sender"></strong> &middot; <time datetime="" data-field="created_at"></time></p>
+        <p data-field="message_text"></p>
+      </div>
+    </li>
+  </template>
+
+  <!-- 1-click application (PITCH_APPLICATIONS) -->
+  <dialog class="modal" id="apply-dialog" aria-labelledby="apply-dialog-title">
+    <form class="modal__inner" id="apply-form" novalidate>
+      <input type="hidden" name="pitch_id" id="apply-pitch-id" value="pitch-1">
+      <header class="modal__header">
+        <div>
+          <h2 id="apply-dialog-title">Apply to join</h2>
+          <p id="apply-pitch-title">CampusEats &mdash; canteen pre-order app</p>
+        </div>
+        <button type="submit" class="icon-btn" formmethod="dialog" formnovalidate aria-label="Close">&times;</button>
+      </header>
+      <div class="modal__body">
+        <fieldset>
+          <legend>Role you&rsquo;re applying for</legend>
+          <div class="option-grid" id="apply-roles">
+            <label class="option"><input type="radio" name="role_applied" value="UI/UX" required checked><span>UI/UX</span></label>
+            <label class="option"><input type="radio" name="role_applied" value="Frontend" disabled><span>Frontend</span></label>
+            <label class="option"><input type="radio" name="role_applied" value="Backend"><span>Backend</span></label>
+          </div>
+        </fieldset>
+        <div class="field">
+          <label for="apply-message">Note to the lead <span class="optional">(optional)</span></label>
+          <textarea id="apply-message" name="message" rows="3" maxlength="400" placeholder="Relevant experience and when you&rsquo;re free." aria-describedby="apply-message-count"></textarea>
+          <div class="field__foot"><output class="field__counter" id="apply-message-count" for="apply-message">0 / 400</output></div>
+        </div>
+        <div>
+          <p class="label">Sent with your builder profile</p>
+          <div class="attached-profile">
+            <span class="avatar" aria-hidden="true">NR</span>
+            <div><strong>Nusrat Rahman</strong><small>CSE &middot; Batch 2023 &middot; Figma, Flutter, Supabase</small></div>
+          </div>
+        </div>
+        <p class="form-message" id="apply-message-status" role="status" aria-live="polite"></p>
+      </div>
+      <footer class="modal__footer">
+        <button type="submit" class="btn btn--ghost" formmethod="dialog" formnovalidate>Cancel</button>
+        <button type="submit" class="btn btn--primary">Send application</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- New pitch (PROJECT_PITCHES) -->
+  <dialog class="modal modal--wide" id="pitch-dialog" aria-labelledby="pitch-dialog-title">
+    <form class="modal__inner" id="pitch-form" novalidate>
+      <header class="modal__header">
+        <div>
+          <h2 id="pitch-dialog-title">Pitch a project</h2>
+          <p>You become the Project Lead and review who joins.</p>
+        </div>
+        <button type="submit" class="icon-btn" formmethod="dialog" formnovalidate aria-label="Close">&times;</button>
+      </header>
+      <div class="modal__body">
+        <div class="field">
+          <label for="pitch-title">Project title</label>
+          <input type="text" id="pitch-title" name="title" maxlength="100" placeholder="e.g. LabSlot &mdash; book lab equipment by the hour" required>
+        </div>
+        <div class="field">
+          <label for="pitch-description">Scope</label>
+          <textarea id="pitch-description" name="description" rows="4" maxlength="800" placeholder="The problem, what the first version does, and how long you expect it to take." aria-describedby="pitch-description-count" required></textarea>
+          <div class="field__foot"><output class="field__counter" id="pitch-description-count" for="pitch-description">0 / 800</output></div>
+        </div>
+        <fieldset>
+          <legend>Roles you need</legend>
+          <div class="option-grid">
+            <label class="option"><input type="checkbox" name="roles_needed" value="UI/UX"><span>UI/UX</span></label>
+            <label class="option"><input type="checkbox" name="roles_needed" value="Frontend"><span>Frontend</span></label>
+            <label class="option"><input type="checkbox" name="roles_needed" value="Backend"><span>Backend</span></label>
+            <label class="option"><input type="checkbox" name="roles_needed" value="Mobile"><span>Mobile</span></label>
+            <label class="option"><input type="checkbox" name="roles_needed" value="ML / Data"><span>ML / Data</span></label>
+            <label class="option"><input type="checkbox" name="roles_needed" value="Research"><span>Research</span></label>
+          </div>
+        </fieldset>
+        <div class="field-row">
+          <div class="field">
+            <label for="pitch-stack">Tech stack</label>
+            <input type="text" id="pitch-stack" name="tech_stack" placeholder="Flutter, Supabase, Figma" aria-describedby="pitch-stack-hint">
+            <p class="hint" id="pitch-stack-hint">Separate with commas.</p>
+          </div>
+          <div class="field">
+            <label for="pitch-size">Team size</label>
+            <input type="number" id="pitch-size" name="team_size" min="2" max="10" value="4" inputmode="numeric">
+          </div>
+        </div>
+        <div class="field">
+          <label for="pitch-thumb">Cover image <span class="optional">(optional)</span></label>
+          <input type="file" id="pitch-thumb" name="thumbnail" accept="image/png, image/jpeg, image/webp">
+        </div>
+        <p class="form-message" id="pitch-message" role="status" aria-live="polite"></p>
+      </div>
+      <footer class="modal__footer">
+        <button type="submit" class="btn btn--ghost" formmethod="dialog" formnovalidate>Cancel</button>
+        <button type="submit" class="btn btn--accent">Publish pitch</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- Builder profile (PROFILES table) -->
+  <dialog class="modal modal--wide" id="profile-dialog" aria-labelledby="profile-dialog-title">
+    <form class="modal__inner" id="profile-form" novalidate>
+      <header class="modal__header">
+        <div>
+          <h2 id="profile-dialog-title">Your builder profile</h2>
+          <p>Shown on your pitches, applications and Spotlight posts. Never shown on the Campus Board.</p>
+        </div>
+        <button type="submit" class="icon-btn" formmethod="dialog" formnovalidate aria-label="Close">&times;</button>
+      </header>
+      <div class="modal__body">
+        <div class="field-row">
+          <div class="field">
+            <label for="profile-name">Full name</label>
+            <input type="text" id="profile-name" name="full_name" autocomplete="name" value="Nusrat Rahman" required>
+          </div>
+          <div class="field">
+            <label for="profile-email">University email</label>
+            <input type="email" id="profile-email" name="edu_email" value="nusrat.rahman@pub.ac.bd" readonly aria-describedby="profile-email-hint">
+            <p class="hint" id="profile-email-hint">Verified. This can&rsquo;t be changed.</p>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="profile-department">Department</label>
+            <select id="profile-department" name="department" required>
+              <option value="" disabled>Choose department</option>
+              <option value="CSE" selected>Computer Science &amp; Engineering (CSE)</option>
+              <option value="EEE">Electrical &amp; Electronic Engineering (EEE)</option>
+              <option value="CIV">Civil Engineering</option>
+              <option value="ARC">Architecture</option>
+              <option value="BBA">Business Administration (BBA)</option>
+              <option value="ENG">English</option>
+              <option value="LAW">Law</option>
+              <option value="ECO">Economics</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="profile-batch">Batch year</label>
+            <input type="number" id="profile-batch" name="batch_year" inputmode="numeric" min="2000" max="2035" value="2023" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="profile-skills">Skills</label>
+          <input type="text" id="profile-skills" name="skills" value="Figma, Flutter, Supabase, UX research" aria-describedby="profile-skills-hint">
+          <p class="hint" id="profile-skills-hint">Separate skills with commas. They appear as tags on your profile.</p>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="profile-github">GitHub <span class="optional">(optional)</span></label>
+            <input type="url" id="profile-github" name="github_url" placeholder="https://github.com/username" value="https://github.com/nusrat-r">
+          </div>
+          <div class="field">
+            <label for="profile-portfolio">Portfolio <span class="optional">(optional)</span></label>
+            <input type="url" id="profile-portfolio" name="portfolio_url" placeholder="https://">
+          </div>
+        </div>
+        <p class="form-message" id="profile-message" role="status" aria-live="polite"></p>
+      </div>
+      <footer class="modal__footer">
+        <button type="submit" class="btn btn--ghost" formmethod="dialog" formnovalidate>Cancel</button>
+        <button type="submit" class="btn btn--primary">Save profile</button>
+      </footer>
+    </form>
+  </dialog>
+</body>
+</html>

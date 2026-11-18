@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hall of Fame · Pundra UniVerse (PUB Hub)</title>
+  <meta name="description" content="Official Pundra University announcements: contest wins, research grants and club championships.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#1f4d3a">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&amp;family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Step 3 scripts: Supabase JS v2 (CDN), then the PUB Hub modules. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="js/supabaseClient.js" defer></script>
+  <script src="js/auth.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body data-page="hall-of-fame">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="index.html" aria-label="Pundra UniVerse home">
+        <span class="brand__mark" aria-hidden="true">PUB</span>
+        <span class="brand__text">
+          <strong>Pundra UniVerse</strong>
+          <small>PUB Hub</small>
+        </span>
+      </a>
+
+      <nav class="site-nav" aria-label="Main">
+        <ul>
+          <li><a href="index.html">Spotlight</a></li>
+          <li><a href="collab.html">Collab Hub</a></li>
+          <li><a href="feedback.html">Campus Board</a></li>
+          <li><a href="hall-of-fame.html" aria-current="page">Hall of Fame</a></li>
+        </ul>
+      </nav>
+
+      <div class="site-header__actions">
+        <button type="button" class="icon-btn" id="theme-toggle" aria-pressed="false" aria-label="Use dark theme" title="Switch colour theme">
+          <span aria-hidden="true">&#9680;</span>
+        </button>
+        <button type="button" class="user-chip member-only" id="profile-button" data-open-dialog="profile-dialog" aria-haspopup="dialog" aria-label="Open your builder profile">
+          <span class="avatar" id="user-initials" aria-hidden="true">NR</span>
+          <span class="user-chip__text">
+            <span id="user-name">Nusrat Rahman</span>
+            <small id="user-meta">CSE &middot; Batch 2023</small>
+          </span>
+        </button>
+        <button type="button" class="btn btn--ghost btn--sm member-only" id="sign-out-button">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main" id="main">
+    <!-- Restricted access: shown when body[data-auth="guest"] (set by js/auth.js). -->
+    <section class="auth-gate" id="auth-gate" aria-labelledby="auth-title">
+      <div class="card auth-card">
+        <div class="auth-card__intro">
+          <p class="eyebrow">Campus members only</p>
+          <h2 id="auth-title">Sign in to PUB Hub</h2>
+          <p>Pitches, the Campus Board and team workspaces are open to verified Pundra University members. Use your university email.</p>
+        </div>
+
+        <div class="segmented segmented--block" role="tablist" aria-label="Account">
+          <button type="button" role="tab" id="tab-login" aria-selected="true" aria-controls="login-panel">Sign in</button>
+          <button type="button" role="tab" id="tab-signup" aria-selected="false" aria-controls="signup-panel" tabindex="-1">Create account</button>
+        </div>
+
+        <div id="login-panel" role="tabpanel" aria-labelledby="tab-login">
+        <form class="form" id="login-form" novalidate>
+          <div class="field">
+            <label for="login-email">University email</label>
+            <input type="email" id="login-email" name="email" autocomplete="email" placeholder="you@pub.ac.bd" required>
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" name="password" autocomplete="current-password" required>
+          </div>
+          <div class="auth-card__row">
+            <button type="button" class="text-btn" id="forgot-password">Forgot password?</button>
+            <button type="submit" class="btn btn--primary">Sign in</button>
+          </div>
+        </form>
+        </div>
+
+        <div id="signup-panel" role="tabpanel" aria-labelledby="tab-signup" hidden>
+        <form class="form" id="signup-form" novalidate>
+          <div class="field">
+            <label for="signup-name">Full name</label>
+            <input type="text" id="signup-name" name="full_name" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="signup-email">University email</label>
+            <input type="email" id="signup-email" name="email" autocomplete="email" placeholder="you@pub.ac.bd" aria-describedby="signup-email-hint" required>
+            <p class="hint" id="signup-email-hint">Accounts are limited to .edu and .ac.bd addresses. We&rsquo;ll send a link to verify it.</p>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="signup-department">Department</label>
+              <select id="signup-department" name="department" required>
+              <option value="" disabled selected>Choose department</option>
+              <option value="CSE">Computer Science &amp; Engineering (CSE)</option>
+              <option value="EEE">Electrical &amp; Electronic Engineering (EEE)</option>
+              <option value="CIV">Civil Engineering</option>
+              <option value="ARC">Architecture</option>
+              <option value="BBA">Business Administration (BBA)</option>
+              <option value="ENG">English</option>
+              <option value="LAW">Law</option>
+              <option value="ECO">Economics</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="signup-batch">Batch year</label>
+              <input type="number" id="signup-batch" name="batch_year" inputmode="numeric" min="2000" max="2035" placeholder="2024" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="signup-password">Password</label>
+            <input type="password" id="signup-password" name="password" autocomplete="new-password" minlength="8" aria-describedby="signup-password-hint" required>
+            <p class="hint" id="signup-password-hint">At least 8 characters.</p>
+          </div>
+          <button type="submit" class="btn btn--accent btn--block">Create account</button>
+        </form>
+        </div>
+
+        <p class="form-message" id="auth-message" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <div class="app-content">
+      <section class="container page-hero" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">The Hall of Fame</p>
+          <h1 id="page-title">Official wins, <em>on the record.</em></h1>
+          <p class="lede">Announcements from department heads, the Student Council and club leads. React to celebrate &mdash; comments are off so the record stays clean.</p>
+        </div>
+        <div class="page-hero__actions">
+          <p class="readonly-note">Read-only &middot; reactions on, comments off</p>
+          <!-- Authorized Publisher only (is_publisher). js/auth.js removes hidden. -->
+          <button type="button" class="btn btn--accent" id="publish-button" data-requires-role="publisher" data-open-dialog="publish-dialog" aria-haspopup="dialog" hidden>Publish announcement</button>
+        </div>
+      </section>
+
+      <div class="container">
+        <section aria-labelledby="featured-title">
+          <h2 class="visually-hidden" id="featured-title">Featured announcement</h2>
+          <article class="card broadcast-featured" data-id="hof-1" data-category="contest">
+            <div class="broadcast-featured__art" aria-hidden="true">
+              <span class="broadcast-featured__rank">#7</span>
+              <span class="broadcast-featured__caption">ICPC Asia Dhaka Regional &middot; 2026</span>
+            </div>
+            <div class="broadcast-featured__body">
+              <div class="broadcast-featured__row">
+                <span class="tag tag--contest">Contest win</span>
+                <time class="card__meta" datetime="2026-11-15">15 Nov 2026</time>
+              </div>
+              <h3>PUB team ranks 7th at the ICPC Asia Dhaka Regional</h3>
+              <p>Team PUB_Byte &mdash; Arif, Sabbir and Nadia &mdash; solved 8 of 12 problems. It&rsquo;s the university&rsquo;s best finish yet and earns a place at the national training camp.</p>
+              <div class="cheer-bar" role="group" aria-label="Reactions">
+                    <button type="button" class="cheer" data-reaction="applaud" aria-pressed="true"><span aria-hidden="true">&#128079;</span> Applaud <span class="cheer__count">412</span></button>
+                    <button type="button" class="cheer" data-reaction="celebrate" aria-pressed="false"><span aria-hidden="true">&#127881;</span> Celebrate <span class="cheer__count">228</span></button>
+                    <button type="button" class="cheer" data-reaction="inspiring" aria-pressed="false"><span aria-hidden="true">&#11088;</span> Inspiring <span class="cheer__count">150</span></button>
+              </div>
+              <div class="broadcast-featured__foot">
+                <p class="publisher">
+                  <span class="publisher__seal" aria-hidden="true">CSE</span>
+                  <span><span class="publisher__role">Department Head</span><span class="publisher__unit">Computer Science &amp; Engineering</span></span>
+                </p>
+                <a class="link-pill" href="#" target="_blank" rel="noopener noreferrer">Official standings</a>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="section" aria-labelledby="broadcasts-title">
+          <div class="feed__toolbar">
+            <h2 class="section-title" id="broadcasts-title">All announcements</h2>
+            <div class="chip-group" id="hof-filter" role="group" aria-label="Filter by category">
+              <button type="button" class="chip" data-filter="all" aria-pressed="true">All</button>
+              <button type="button" class="chip" data-filter="contest" aria-pressed="false">Contest wins</button>
+              <button type="button" class="chip" data-filter="grant" aria-pressed="false">Grants</button>
+              <button type="button" class="chip" data-filter="club" aria-pressed="false">Club championships</button>
+              <button type="button" class="chip" data-filter="research" aria-pressed="false">Research</button>
+            </div>
+          </div>
+
+          <!-- HALL_OF_FAME feed. Sample posts below are replaced by js/app.js. -->
+          <ol class="broadcast-list" id="hof-feed" aria-live="polite" aria-busy="false">
+            <li class="broadcast">
+              <p class="broadcast__date" aria-hidden="true"><span class="broadcast__day">14</span><span class="broadcast__month">Nov</span></p>
+              <article class="card broadcast-card" data-id="hof-2" data-category="club">
+                <header class="card__header">
+                  <span class="tag tag--club">Club championship</span>
+                  <time class="card__meta" datetime="2026-11-14">14 Nov 2026</time>
+                </header>
+                <h3>Robotics Club wins the National Line-Follower Championship</h3>
+                <p class="card__body">Team Pathfinder beat 46 university teams with a 21.4-second run. The robot was designed and built in the EEE workshop over one semester.</p>
+                <footer class="broadcast-card__foot">
+                  <p class="publisher">
+                    <span class="publisher__seal" aria-hidden="true">SC</span>
+                    <span><span class="publisher__role">Student Council</span><span class="publisher__unit">on behalf of PUB Robotics Club</span></span>
+                  </p>
+                  <a class="link-pill" href="#" target="_blank" rel="noopener noreferrer">Results sheet</a>
+                </footer>
+                <div class="cheer-bar" role="group" aria-label="Reactions">
+                    <button type="button" class="cheer" data-reaction="applaud" aria-pressed="false"><span aria-hidden="true">&#128079;</span> Applaud <span class="cheer__count">186</span></button>
+                    <button type="button" class="cheer" data-reaction="celebrate" aria-pressed="true"><span aria-hidden="true">&#127881;</span> Celebrate <span class="cheer__count">94</span></button>
+                    <button type="button" class="cheer" data-reaction="inspiring" aria-pressed="false"><span aria-hidden="true">&#11088;</span> Inspiring <span class="cheer__count">41</span></button>
+                </div>
+              </article>
+            </li>
+            <li class="broadcast">
+              <p class="broadcast__date" aria-hidden="true"><span class="broadcast__day">09</span><span class="broadcast__month">Nov</span></p>
+              <article class="card broadcast-card" data-id="hof-3" data-category="grant">
+                <header class="card__header">
+                  <span class="tag tag--grant">Grant</span>
+                  <time class="card__meta" datetime="2026-11-09">09 Nov 2026</time>
+                </header>
+                <h3>UGC research grant for three faculty&ndash;student projects</h3>
+                <p class="card__body">Tk 18 lakh across solar micro-grids for char villages, crop-disease detection from phone photos, and low-cost water-quality sensors. Each team includes two undergraduates.</p>
+                <footer class="broadcast-card__foot">
+                  <p class="publisher">
+                    <span class="publisher__seal" aria-hidden="true">EEE</span>
+                    <span><span class="publisher__role">Department Head</span><span class="publisher__unit">Electrical &amp; Electronic Engineering</span></span>
+                  </p>
+                  <a class="link-pill" href="#" target="_blank" rel="noopener noreferrer">Grant notice</a>
+                </footer>
+                <div class="cheer-bar" role="group" aria-label="Reactions">
+                    <button type="button" class="cheer" data-reaction="applaud" aria-pressed="false"><span aria-hidden="true">&#128079;</span> Applaud <span class="cheer__count">142</span></button>
+                    <button type="button" class="cheer" data-reaction="celebrate" aria-pressed="false"><span aria-hidden="true">&#127881;</span> Celebrate <span class="cheer__count">58</span></button>
+                    <button type="button" class="cheer" data-reaction="inspiring" aria-pressed="false"><span aria-hidden="true">&#11088;</span> Inspiring <span class="cheer__count">77</span></button>
+                </div>
+              </article>
+            </li>
+            <li class="broadcast">
+              <p class="broadcast__date" aria-hidden="true"><span class="broadcast__day">02</span><span class="broadcast__month">Nov</span></p>
+              <article class="card broadcast-card" data-id="hof-4" data-category="research">
+                <header class="card__header">
+                  <span class="tag tag--research">Research</span>
+                  <time class="card__meta" datetime="2026-11-02">02 Nov 2026</time>
+                </header>
+                <h3>Best Paper Award at ICEEICT 2026</h3>
+                <p class="card__body">Farhana Akter and Dr. Kamrul Hasan won Best Paper in the power systems track for their fuzzy-logic solar charge controller.</p>
+                <footer class="broadcast-card__foot">
+                  <p class="publisher">
+                    <span class="publisher__seal" aria-hidden="true">RS</span>
+                    <span><span class="publisher__role">Club Lead</span><span class="publisher__unit">PUB Research Society</span></span>
+                  </p>
+                  <a class="link-pill" href="#" target="_blank" rel="noopener noreferrer">Conference page</a>
+                </footer>
+                <div class="cheer-bar" role="group" aria-label="Reactions">
+                    <button type="button" class="cheer" data-reaction="applaud" aria-pressed="false"><span aria-hidden="true">&#128079;</span> Applaud <span class="cheer__count">97</span></button>
+                    <button type="button" class="cheer" data-reaction="celebrate" aria-pressed="false"><span aria-hidden="true">&#127881;</span> Celebrate <span class="cheer__count">31</span></button>
+                    <button type="button" class="cheer" data-reaction="inspiring" aria-pressed="false"><span aria-hidden="true">&#11088;</span> Inspiring <span class="cheer__count">64</span></button>
+                </div>
+              </article>
+            </li>
+            <li class="broadcast">
+              <p class="broadcast__date" aria-hidden="true"><span class="broadcast__day">27</span><span class="broadcast__month">Oct</span></p>
+              <article class="card broadcast-card" data-id="hof-5" data-category="contest">
+                <header class="card__header">
+                  <span class="tag tag--contest">Contest win</span>
+                  <time class="card__meta" datetime="2026-10-27">27 Oct 2026</time>
+                </header>
+                <h3>Second place at IUPC Rajshahi</h3>
+                <p class="card__body">Team PUB_Byte placed second of 88 teams at the inter-university programming contest &mdash; a warm-up for the ICPC regional.</p>
+                <footer class="broadcast-card__foot">
+                  <p class="publisher">
+                    <span class="publisher__seal" aria-hidden="true">PC</span>
+                    <span><span class="publisher__role">Club Lead</span><span class="publisher__unit">PUB Programming Club</span></span>
+                  </p>
+                  <a class="link-pill" href="#" target="_blank" rel="noopener noreferrer">Final standings</a>
+                </footer>
+                <div class="cheer-bar" role="group" aria-label="Reactions">
+                    <button type="button" class="cheer" data-reaction="applaud" aria-pressed="false"><span aria-hidden="true">&#128079;</span> Applaud <span class="cheer__count">121</span></button>
+                    <button type="button" class="cheer" data-reaction="celebrate" aria-pressed="false"><span aria-hidden="true">&#127881;</span> Celebrate <span class="cheer__count">46</span></button>
+                    <button type="button" class="cheer" data-reaction="inspiring" aria-pressed="false"><span aria-hidden="true">&#11088;</span> Inspiring <span class="cheer__count">22</span></button>
+                </div>
+              </article>
+            </li>
+          </ol>
+
+          <div class="empty-state" id="hof-empty" hidden>
+            <h3>No announcements in this category yet</h3>
+          </div>
+
+          <div class="feed__more">
+            <button type="button" class="btn btn--ghost btn--block" id="load-more-hof">Load older announcements</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p><strong>Pundra UniVerse</strong> &middot; PUB Hub &mdash; for verified Pundra University members.</p>
+      <nav aria-label="Footer">
+        <ul>
+          <li><a href="index.html">Spotlight</a></li>
+          <li><a href="collab.html">Collab Hub</a></li>
+          <li><a href="feedback.html">Campus Board</a></li>
+          <li><a href="hall-of-fame.html">Hall of Fame</a></li>
+        </ul>
+      </nav>
+      <p class="site-footer__note">Campus Board posts lock after 20 days and are deleted after 60 days unless an admin keeps them. Anonymous posts are never linked to your account.</p>
+    </div>
+  </footer>
+
+  <div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
+
+  <!-- Announcement template for js/app.js -->
+  <template id="broadcast-template">
+    <li class="broadcast">
+      <p class="broadcast__date" aria-hidden="true"><span class="broadcast__day"></span><span class="broadcast__month"></span></p>
+      <article class="card broadcast-card" data-id="" data-category="">
+        <img class="card__thumb" alt="" loading="lazy" hidden>
+        <header class="card__header">
+          <span class="tag" data-field="category"></span>
+          <time class="card__meta" datetime="" data-field="created_at"></time>
+        </header>
+        <h3 data-field="title"></h3>
+        <p class="card__body" data-field="details"></p>
+        <footer class="broadcast-card__foot">
+          <p class="publisher">
+            <span class="publisher__seal" aria-hidden="true" data-field="seal"></span>
+            <span><span class="publisher__role" data-field="publisher_role"></span><span class="publisher__unit" data-field="publisher_unit"></span></span>
+          </p>
+          <a class="link-pill" href="#" target="_blank" rel="noopener noreferrer" data-field="proof_link">Proof</a>
+        </footer>
+        <div class="cheer-bar" role="group" aria-label="Reactions">
+          <button type="button" class="cheer" data-reaction="applaud" aria-pressed="false"><span aria-hidden="true">&#128079;</span> Applaud <span class="cheer__count">0</span></button>
+          <button type="button" class="cheer" data-reaction="celebrate" aria-pressed="false"><span aria-hidden="true">&#127881;</span> Celebrate <span class="cheer__count">0</span></button>
+          <button type="button" class="cheer" data-reaction="inspiring" aria-pressed="false"><span aria-hidden="true">&#11088;</span> Inspiring <span class="cheer__count">0</span></button>
+        </div>
+      </article>
+    </li>
+  </template>
+
+  <!-- Publish announcement (HALL_OF_FAME) — Authorized Publishers only -->
+  <dialog class="modal modal--wide" id="publish-dialog" aria-labelledby="publish-dialog-title">
+    <form class="modal__inner" id="publish-form" novalidate>
+      <header class="modal__header">
+        <div>
+          <h2 id="publish-dialog-title">Publish an announcement</h2>
+          <p>Goes to every PUB Hub member. Students can react but not comment.</p>
+        </div>
+        <button type="submit" class="icon-btn" formmethod="dialog" formnovalidate aria-label="Close">&times;</button>
+      </header>
+      <div class="modal__body">
+        <fieldset>
+          <legend>Category</legend>
+          <div class="option-grid">
+            <label class="option"><input type="radio" name="category" value="contest" required checked><span>Contest win</span></label>
+            <label class="option"><input type="radio" name="category" value="grant"><span>Grant</span></label>
+            <label class="option"><input type="radio" name="category" value="club"><span>Club championship</span></label>
+            <label class="option"><input type="radio" name="category" value="research"><span>Research</span></label>
+          </div>
+        </fieldset>
+        <div class="field">
+          <label for="publish-title">Headline</label>
+          <input type="text" id="publish-title" name="title" maxlength="120" placeholder="e.g. PUB team ranks 7th at ICPC Asia Dhaka Regional" required>
+        </div>
+        <div class="field">
+          <label for="publish-details">Details</label>
+          <textarea id="publish-details" name="details" rows="4" maxlength="800" placeholder="Who, what they achieved, and why it matters." aria-describedby="publish-details-count" required></textarea>
+          <div class="field__foot"><output class="field__counter" id="publish-details-count" for="publish-details">0 / 800</output></div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="publish-proof">Proof link</label>
+            <input type="url" id="publish-proof" name="proof_link" placeholder="Official results or notice" required>
+          </div>
+          <div class="field">
+            <label for="publish-unit">Publishing as</label>
+            <input type="text" id="publish-unit" name="publisher_unit" value="Department Head &middot; CSE" readonly>
+          </div>
+        </div>
+        <div class="field">
+          <label for="publish-image">Image <span class="optional">(optional)</span></label>
+          <input type="file" id="publish-image" name="image" accept="image/png, image/jpeg, image/webp">
+        </div>
+        <label class="toggle"><input type="checkbox" name="featured"> Feature at the top of the Hall of Fame</label>
+        <p class="form-message" id="publish-message" role="status" aria-live="polite"></p>
+      </div>
+      <footer class="modal__footer">
+        <button type="submit" class="btn btn--ghost" formmethod="dialog" formnovalidate>Cancel</button>
+        <button type="submit" class="btn btn--accent">Publish</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- Builder profile (PROFILES table) -->
+  <dialog class="modal modal--wide" id="profile-dialog" aria-labelledby="profile-dialog-title">
+    <form class="modal__inner" id="profile-form" novalidate>
+      <header class="modal__header">
+        <div>
+          <h2 id="profile-dialog-title">Your builder profile</h2>
+          <p>Shown on your pitches, applications and Spotlight posts. Never shown on the Campus Board.</p>
+        </div>
+        <button type="submit" class="icon-btn" formmethod="dialog" formnovalidate aria-label="Close">&times;</button>
+      </header>
+      <div class="modal__body">
+        <div class="field-row">
+          <div class="field">
+            <label for="profile-name">Full name</label>
+            <input type="text" id="profile-name" name="full_name" autocomplete="name" value="Nusrat Rahman" required>
+          </div>
+          <div class="field">
+            <label for="profile-email">University email</label>
+            <input type="email" id="profile-email" name="edu_email" value="nusrat.rahman@pub.ac.bd" readonly aria-describedby="profile-email-hint">
+            <p class="hint" id="profile-email-hint">Verified. This can&rsquo;t be changed.</p>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="profile-department">Department</label>
+            <select id="profile-department" name="department" required>
+              <option value="" disabled>Choose department</option>
+              <option value="CSE" selected>Computer Science &amp; Engineering (CSE)</option>
+              <option value="EEE">Electrical &amp; Electronic Engineering (EEE)</option>
+              <option value="CIV">Civil Engineering</option>
+              <option value="ARC">Architecture</option>
+              <option value="BBA">Business Administration (BBA)</option>
+              <option value="ENG">English</option>
+              <option value="LAW">Law</option>
+              <option value="ECO">Economics</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="profile-batch">Batch year</label>
+            <input type="number" id="profile-batch" name="batch_year" inputmode="numeric" min="2000" max="2035" value="2023" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="profile-skills">Skills</label>
+          <input type="text" id="profile-skills" name="skills" value="Figma, Flutter, Supabase, UX research" aria-describedby="profile-skills-hint">
+          <p class="hint" id="profile-skills-hint">Separate skills with commas. They appear as tags on your profile.</p>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="profile-github">GitHub <span class="optional">(optional)</span></label>
+            <input type="url" id="profile-github" name="github_url" placeholder="https://github.com/username" value="https://github.com/nusrat-r">
+          </div>
+          <div class="field">
+            <label for="profile-portfolio">Portfolio <span class="optional">(optional)</span></label>
+            <input type="url" id="profile-portfolio" name="portfolio_url" placeholder="https://">
+          </div>
+        </div>
+        <p class="form-message" id="profile-message" role="status" aria-live="polite"></p>
+      </div>
+      <footer class="modal__footer">
+        <button type="submit" class="btn btn--ghost" formmethod="dialog" formnovalidate>Cancel</button>
+        <button type="submit" class="btn btn--primary">Save profile</button>
+      </footer>
+    </form>
+  </dialog>
+</body>
+</html>

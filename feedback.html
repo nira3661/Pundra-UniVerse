@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campus Board · Pundra UniVerse (PUB Hub)</title>
+  <meta name="description" content="Anonymous, filtered feedback on faculty, labs, facilities and administration at Pundra University.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#1f4d3a">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&amp;family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/watermark.css">
+
+  <!-- Step 3 scripts: Supabase JS v2 (CDN), then the PUB Hub modules. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="js/supabaseClient.js" defer></script>
+  <script src="js/auth.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body data-page="feedback">
+  <!-- Viewer watermark: js/auth.js replaces these tiles with the signed-in
+       user's email and session timestamp, sized to the screen. -->
+  <div class="watermark" id="watermark" aria-hidden="true">
+    <div class="watermark__layer" id="watermark-layer">
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+      <span class="watermark__tile">nusrat.rahman@pub.ac.bd<small>18 Nov 2026 &middot; 10:04 +06</small></span>
+    </div>
+  </div>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="index.html" aria-label="Pundra UniVerse home">
+        <span class="brand__mark" aria-hidden="true">PUB</span>
+        <span class="brand__text">
+          <strong>Pundra UniVerse</strong>
+          <small>PUB Hub</small>
+        </span>
+      </a>
+
+      <nav class="site-nav" aria-label="Main">
+        <ul>
+          <li><a href="index.html">Spotlight</a></li>
+          <li><a href="collab.html">Collab Hub</a></li>
+          <li><a href="feedback.html" aria-current="page">Campus Board</a></li>
+          <li><a href="hall-of-fame.html">Hall of Fame</a></li>
+        </ul>
+      </nav>
+
+      <div class="site-header__actions">
+        <button type="button" class="icon-btn" id="theme-toggle" aria-pressed="false" aria-label="Use dark theme" title="Switch colour theme">
+          <span aria-hidden="true">&#9680;</span>
+        </button>
+        <button type="button" class="user-chip member-only" id="profile-button" data-open-dialog="profile-dialog" aria-haspopup="dialog" aria-label="Open your builder profile">
+          <span class="avatar" id="user-initials" aria-hidden="true">NR</span>
+          <span class="user-chip__text">
+            <span id="user-name">Nusrat Rahman</span>
+            <small id="user-meta">CSE &middot; Batch 2023</small>
+          </span>
+        </button>
+        <button type="button" class="btn btn--ghost btn--sm member-only" id="sign-out-button">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main" id="main">
+    <!-- Restricted access: shown when body[data-auth="guest"] (set by js/auth.js). -->
+    <section class="auth-gate" id="auth-gate" aria-labelledby="auth-title">
+      <div class="card auth-card">
+        <div class="auth-card__intro">
+          <p class="eyebrow">Campus members only</p>
+          <h2 id="auth-title">Sign in to PUB Hub</h2>
+          <p>Pitches, the Campus Board and team workspaces are open to verified Pundra University members. Use your university email.</p>
+        </div>
+
+        <div class="segmented segmented--block" role="tablist" aria-label="Account">
+          <button type="button" role="tab" id="tab-login" aria-selected="true" aria-controls="login-panel">Sign in</button>
+          <button type="button" role="tab" id="tab-signup" aria-selected="false" aria-controls="signup-panel" tabindex="-1">Create account</button>
+        </div>
+
+        <div id="login-panel" role="tabpanel" aria-labelledby="tab-login">
+        <form class="form" id="login-form" novalidate>
+          <div class="field">
+            <label for="login-email">University email</label>
+            <input type="email" id="login-email" name="email" autocomplete="email" placeholder="you@pub.ac.bd" required>
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" name="password" autocomplete="current-password" required>
+          </div>
+          <div class="auth-card__row">
+            <button type="button" class="text-btn" id="forgot-password">Forgot password?</button>
+            <button type="submit" class="btn btn--primary">Sign in</button>
+          </div>
+        </form>
+        </div>
+
+        <div id="signup-panel" role="tabpanel" aria-labelledby="tab-signup" hidden>
+        <form class="form" id="signup-form" novalidate>
+          <div class="field">
+            <label for="signup-name">Full name</label>
+            <input type="text" id="signup-name" name="full_name" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="signup-email">University email</label>
+            <input type="email" id="signup-email" name="email" autocomplete="email" placeholder="you@pub.ac.bd" aria-describedby="signup-email-hint" required>
+            <p class="hint" id="signup-email-hint">Accounts are limited to .edu and .ac.bd addresses. We&rsquo;ll send a link to verify it.</p>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="signup-department">Department</label>
+              <select id="signup-department" name="department" required>
+              <option value="" disabled selected>Choose department</option>
+              <option value="CSE">Computer Science &amp; Engineering (CSE)</option>
+              <option value="EEE">Electrical &amp; Electronic Engineering (EEE)</option>
+              <option value="CIV">Civil Engineering</option>
+              <option value="ARC">Architecture</option>
+              <option value="BBA">Business Administration (BBA)</option>
+              <option value="ENG">English</option>
+              <option value="LAW">Law</option>
+              <option value="ECO">Economics</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="signup-batch">Batch year</label>
+              <input type="number" id="signup-batch" name="batch_year" inputmode="numeric" min="2000" max="2035" placeholder="2024" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="signup-password">Password</label>
+            <input type="password" id="signup-password" name="password" autocomplete="new-password" minlength="8" aria-describedby="signup-password-hint" required>
+            <p class="hint" id="signup-password-hint">At least 8 characters.</p>
+          </div>
+          <button type="submit" class="btn btn--accent btn--block">Create account</button>
+        </form>
+        </div>
+
+        <p class="form-message" id="auth-message" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <div class="app-content">
+      <section class="container page-hero" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">The Campus Board</p>
+          <h1 id="page-title">Say it straight. <em>Stay</em> anonymous.</h1>
+          <p class="lede">Raise issues about grading, labs, facilities and administration. Posts carry a department pseudonym only &mdash; nothing on this board links back to your account.</p>
+        </div>
+        <div class="page-hero__actions">
+          <p class="anon-pill">
+            <span class="anon-pill__mask" aria-hidden="true">ANON</span>
+            <span>Posting as <span class="handle" id="anon-handle">Anon-CSE-442</span></span>
+          </p>
+          <button type="button" class="btn btn--accent" data-open-dialog="feedback-dialog" aria-haspopup="dialog">Post feedback</button>
+        </div>
+      </section>
+
+      <div class="container layout layout--with-aside">
+        <section class="feed" aria-labelledby="feed-title">
+          <div class="feed__toolbar">
+            <h2 class="section-title" id="feed-title">Feedback stream</h2>
+            <fieldset class="segmented" id="feedback-sort">
+              <legend class="visually-hidden">Sort feedback</legend>
+              <input type="radio" id="sort-trending" name="sort" value="trending" checked>
+              <label for="sort-trending">Trending</label>
+              <input type="radio" id="sort-newest" name="sort" value="newest">
+              <label for="sort-newest">Newest</label>
+            </fieldset>
+          </div>
+          <div class="chip-group filter-row" id="category-filter" role="group" aria-label="Filter by category">
+            <button type="button" class="chip" data-filter="all" aria-pressed="true">All <span class="chip__count">86</span></button>
+            <button type="button" class="chip" data-filter="faculty" aria-pressed="false">Faculty &amp; Grading <span class="chip__count">21</span></button>
+            <button type="button" class="chip" data-filter="labs" aria-pressed="false">Labs &amp; Equipment <span class="chip__count">29</span></button>
+            <button type="button" class="chip" data-filter="facilities" aria-pressed="false">Facilities <span class="chip__count">24</span></button>
+            <button type="button" class="chip" data-filter="admin" aria-pressed="false">Administration <span class="chip__count">12</span></button>
+          </div>
+
+          <!-- CAMPUS_FEEDBACK stream. Sample posts below are replaced by js/app.js. -->
+          <ol class="feedback-list" id="feedback-feed" aria-live="polite" aria-busy="false">
+            <li>
+              <article class="card feedback-card" data-id="fb-1" data-category="labs" data-locked="false">
+                <div class="vote">
+                  <button type="button" class="vote__btn" aria-pressed="true" aria-label="Upvote, 128 votes"><span aria-hidden="true">&#9650;</span></button>
+                  <span class="vote__count" aria-hidden="true">128</span>
+                </div>
+                <div>
+                  <h3 class="visually-hidden">Labs &amp; Equipment feedback from Anon-CSE-442</h3>
+                  <header class="feedback-card__meta">
+                    <span class="handle">Anon-CSE-442</span>
+                    <span class="tag tag--labs">Labs &amp; Equipment</span>
+                    <time datetime="2026-11-12">6 days ago</time>
+                  </header>
+                  <p class="feedback-card__content">Half the PCs in Lab 3 still can&rsquo;t run Android Studio. We lose the first 30 minutes of every mobile dev lab waiting for emulators. An 8&nbsp;GB RAM upgrade would fix most of them.</p>
+                  <footer class="feedback-card__footer">
+                    <div class="lifecycle">
+                      <span class="lifecycle__track" aria-hidden="true"><span class="lifecycle__fill" style="--progress: 30%"></span></span>
+                      <span>Locks in 14 days</span>
+                    </div>
+                    <!-- System Administrator tools (is_admin) -->
+                    <div class="admin-tools" data-requires-role="admin" hidden>
+                      <label class="toggle"><input type="checkbox" name="admin_keep"> Keep past 60 days</label>
+                      <button type="button" class="btn btn--ghost btn--sm" data-action="flag">Flag</button>
+                    </div>
+                  </footer>
+                </div>
+              </article>
+            </li>
+            <li>
+              <article class="card feedback-card" data-id="fb-2" data-category="facilities" data-locked="false">
+                <div class="vote">
+                  <button type="button" class="vote__btn" aria-pressed="false" aria-label="Upvote, 96 votes"><span aria-hidden="true">&#9650;</span></button>
+                  <span class="vote__count" aria-hidden="true">96</span>
+                </div>
+                <div>
+                  <h3 class="visually-hidden">Facilities feedback from Anon-EEE-117</h3>
+                  <header class="feedback-card__meta">
+                    <span class="handle">Anon-EEE-117</span>
+                    <span class="tag tag--facilities">Facilities</span>
+                    <time datetime="2026-11-16">2 days ago</time>
+                  </header>
+                  <p class="feedback-card__content">The water filter on the 4th floor of the academic building has been out for two weeks. Students are buying bottled water between classes.</p>
+                  <footer class="feedback-card__footer">
+                    <div class="lifecycle">
+                      <span class="lifecycle__track" aria-hidden="true"><span class="lifecycle__fill" style="--progress: 10%"></span></span>
+                      <span>Locks in 18 days</span>
+                    </div>
+                    <!-- System Administrator tools (is_admin) -->
+                    <div class="admin-tools" data-requires-role="admin" hidden>
+                      <label class="toggle"><input type="checkbox" name="admin_keep"> Keep past 60 days</label>
+                      <button type="button" class="btn btn--ghost btn--sm" data-action="flag">Flag</button>
+                    </div>
+                  </footer>
+                </div>
+              </article>
+            </li>
+            <li>
+              <article class="card feedback-card" data-id="fb-3" data-category="faculty" data-locked="false">
+                <div class="vote">
+                  <button type="button" class="vote__btn" aria-pressed="false" aria-label="Upvote, 74 votes"><span aria-hidden="true">&#9650;</span></button>
+                  <span class="vote__count" aria-hidden="true">74</span>
+                </div>
+                <div>
+                  <h3 class="visually-hidden">Faculty &amp; Grading feedback from Anon-BBA-305</h3>
+                  <header class="feedback-card__meta">
+                    <span class="handle">Anon-BBA-305</span>
+                    <span class="tag tag--faculty">Faculty &amp; Grading</span>
+                    <time datetime="2026-11-09">9 days ago</time>
+                  </header>
+                  <p class="feedback-card__content">Could mid-term marks be published within two weeks? In two of my courses we sat the final without knowing where we stood.</p>
+                  <footer class="feedback-card__footer">
+                    <div class="lifecycle">
+                      <span class="lifecycle__track" aria-hidden="true"><span class="lifecycle__fill" style="--progress: 45%"></span></span>
+                      <span>Locks in 11 days</span>
+                    </div>
+                    <!-- System Administrator tools (is_admin) -->
+                    <div class="admin-tools" data-requires-role="admin" hidden>
+                      <label class="toggle"><input type="checkbox" name="admin_keep"> Keep past 60 days</label>
+                      <button type="button" class="btn btn--ghost btn--sm" data-action="flag">Flag</button>
+                    </div>
+                  </footer>
+                </div>
+              </article>
+            </li>
+            <li>
+              <article class="card feedback-card is-locked is-kept" data-id="fb-4" data-category="admin" data-locked="true">
+                <div class="vote">
+                  <button type="button" class="vote__btn" aria-pressed="false" aria-label="Upvote, 211 votes" disabled><span aria-hidden="true">&#9650;</span></button>
+                  <span class="vote__count" aria-hidden="true">211</span>
+                </div>
+                <div>
+                  <h3 class="visually-hidden">Administration feedback from Anon-CSE-208</h3>
+                  <header class="feedback-card__meta">
+                    <span class="handle">Anon-CSE-208</span>
+                    <span class="tag tag--admin">Administration</span>
+                  <span class="badge badge--locked">Locked &middot; read-only</span>
+                  <span class="badge badge--kept">Kept by admin</span>
+                    <time datetime="2026-10-25">24 days ago</time>
+                  </header>
+                  <p class="feedback-card__content">The registration portal crashes on day one every semester. Opening slots by batch over two days would spread the load.</p>
+                  <footer class="feedback-card__footer">
+                    <div class="lifecycle">
+                      <span class="lifecycle__track" aria-hidden="true"><span class="lifecycle__fill" style="--progress: 100%"></span></span>
+                      <span>Kept past 60 days</span>
+                    </div>
+                    <!-- System Administrator tools (is_admin) -->
+                    <div class="admin-tools" data-requires-role="admin" hidden>
+                      <label class="toggle"><input type="checkbox" name="admin_keep" checked> Keep past 60 days</label>
+                      <button type="button" class="btn btn--ghost btn--sm" data-action="flag">Flag</button>
+                    </div>
+                  </footer>
+                </div>
+              </article>
+            </li>
+            <li>
+              <article class="card feedback-card is-locked" data-id="fb-5" data-category="labs" data-locked="true">
+                <div class="vote">
+                  <button type="button" class="vote__btn" aria-pressed="false" aria-label="Upvote, 40 votes" disabled><span aria-hidden="true">&#9650;</span></button>
+                  <span class="vote__count" aria-hidden="true">40</span>
+                </div>
+                <div>
+                  <h3 class="visually-hidden">Labs &amp; Equipment feedback from Anon-CIV-061</h3>
+                  <header class="feedback-card__meta">
+                    <span class="handle">Anon-CIV-061</span>
+                    <span class="tag tag--labs">Labs &amp; Equipment</span>
+                  <span class="badge badge--locked">Locked &middot; read-only</span>
+                    <time datetime="2026-10-18">31 days ago</time>
+                  </header>
+                  <p class="feedback-card__content">Surveying lab total stations need recalibration &mdash; readings drift by several centimetres over a 100&nbsp;m traverse.</p>
+                  <footer class="feedback-card__footer">
+                    <div class="lifecycle">
+                      <span class="lifecycle__track" aria-hidden="true"><span class="lifecycle__fill" style="--progress: 52%"></span></span>
+                      <span>Deleted in 29 days</span>
+                    </div>
+                    <!-- System Administrator tools (is_admin) -->
+                    <div class="admin-tools" data-requires-role="admin" hidden>
+                      <label class="toggle"><input type="checkbox" name="admin_keep"> Keep past 60 days</label>
+                      <button type="button" class="btn btn--ghost btn--sm" data-action="flag">Flag</button>
+                    </div>
+                  </footer>
+                </div>
+              </article>
+            </li>
+          </ol>
+
+          <div class="empty-state" id="feedback-empty" hidden>
+            <h3>Nothing in this category yet</h3>
+            <p>If something needs fixing, you can be the first to say so.</p>
+          </div>
+
+          <div class="feed__more">
+            <button type="button" class="btn btn--ghost btn--block" id="load-more-feedback">Load more</button>
+          </div>
+        </section>
+
+        <aside class="sidebar" aria-label="About the Campus Board">
+          <section class="card side-card" aria-labelledby="rules-title">
+            <h2 id="rules-title">How this board works</h2>
+            <dl class="rules">
+              <div><dt>Anonymous by design</dt><dd>Posts store a department pseudonym, never your account. A new handle is made each session.</dd></div>
+              <div><dt>Filtered before posting</dt><dd>Profanity and personal names are blocked. Describe the issue, not the person.</dd></div>
+              <div><dt>Locks on day 20</dt><dd>Older posts become read-only. No new upvotes.</dd></div>
+              <div><dt>Deleted on day 60</dt><dd>Unless an admin keeps a post for follow-up.</dd></div>
+            </dl>
+          </section>
+
+          <section class="card side-card" aria-labelledby="trending-title">
+            <h2 id="trending-title">Trending this week</h2>
+            <ol class="rank-list" id="trending-list">
+              <li><span>Lab 3 PCs can&rsquo;t run Android Studio</span><span class="rank-list__votes">128</span></li>
+              <li><span>4th-floor water filter out for two weeks</span><span class="rank-list__votes">96</span></li>
+              <li><span>Publish mid-term marks within two weeks</span><span class="rank-list__votes">74</span></li>
+            </ol>
+          </section>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p><strong>Pundra UniVerse</strong> &middot; PUB Hub &mdash; for verified Pundra University members.</p>
+      <nav aria-label="Footer">
+        <ul>
+          <li><a href="index.html">Spotlight</a></li>
+          <li><a href="collab.html">Collab Hub</a></li>
+          <li><a href="feedback.html">Campus Board</a></li>
+          <li><a href="hall-of-fame.html">Hall of Fame</a></li>
+        </ul>
+      </nav>
+      <p class="site-footer__note">Campus Board posts lock after 20 days and are deleted after 60 days unless an admin keeps them. Anonymous posts are never linked to your account.</p>
+    </div>
+  </footer>
+
+  <div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
+
+  <!-- Feedback card template for js/app.js -->
+  <template id="feedback-card-template">
+    <li>
+      <article class="card feedback-card" data-id="" data-category="" data-locked="false">
+        <div class="vote">
+          <button type="button" class="vote__btn" aria-pressed="false" aria-label="Upvote"><span aria-hidden="true">&#9650;</span></button>
+          <span class="vote__count" aria-hidden="true" data-field="upvotes_count">0</span>
+        </div>
+        <div>
+          <h3 class="visually-hidden" data-field="heading"></h3>
+          <header class="feedback-card__meta">
+            <span class="handle" data-field="anonymous_handle"></span>
+            <span class="tag" data-field="category"></span>
+            <span class="badge badge--locked" data-field="locked" hidden>Locked &middot; read-only</span>
+            <span class="badge badge--kept" data-field="admin_keep" hidden>Kept by admin</span>
+            <time datetime="" data-field="created_at"></time>
+          </header>
+          <p class="feedback-card__content" data-field="content"></p>
+          <footer class="feedback-card__footer">
+            <div class="lifecycle">
+              <span class="lifecycle__track" aria-hidden="true"><span class="lifecycle__fill"></span></span>
+              <span data-field="lifecycle"></span>
+            </div>
+            <div class="admin-tools" data-requires-role="admin" hidden>
+              <label class="toggle"><input type="checkbox" name="admin_keep"> Keep past 60 days</label>
+              <button type="button" class="btn btn--ghost btn--sm" data-action="flag">Flag</button>
+            </div>
+          </footer>
+        </div>
+      </article>
+    </li>
+  </template>
+
+  <!-- Post anonymous feedback (CAMPUS_FEEDBACK) -->
+  <dialog class="modal" id="feedback-dialog" aria-labelledby="feedback-dialog-title">
+    <form class="modal__inner" id="feedback-form" novalidate>
+      <header class="modal__header">
+        <div>
+          <h2 id="feedback-dialog-title">Post feedback</h2>
+          <p>Shown as <span class="handle" id="feedback-dialog-handle">Anon-CSE-442</span>. Your name and email are not stored with it.</p>
+        </div>
+        <button type="submit" class="icon-btn" formmethod="dialog" formnovalidate aria-label="Close">&times;</button>
+      </header>
+      <div class="modal__body">
+        <fieldset>
+          <legend>Category</legend>
+          <div class="option-grid">
+            <label class="option"><input type="radio" name="category" value="faculty" required><span>Faculty &amp; Grading</span></label>
+            <label class="option"><input type="radio" name="category" value="labs" checked><span>Labs &amp; Equipment</span></label>
+            <label class="option"><input type="radio" name="category" value="facilities"><span>Facilities</span></label>
+            <label class="option"><input type="radio" name="category" value="admin"><span>Administration</span></label>
+          </div>
+        </fieldset>
+        <div class="field">
+          <label for="feedback-content">Your feedback</label>
+          <textarea id="feedback-content" name="content" rows="5" minlength="20" maxlength="1000" placeholder="What&rsquo;s the issue, where, and what would fix it?" aria-describedby="feedback-content-count feedback-filter-message" required></textarea>
+          <div class="field__foot"><output class="field__counter" id="feedback-content-count" for="feedback-content">0 / 1000</output></div>
+        </div>
+        <!-- Filled by the profanity / personal-name filter in js/app.js -->
+        <p class="form-message form-message--error" id="feedback-filter-message" role="alert"></p>
+        <details class="guidelines">
+          <summary>Posting guidelines</summary>
+          <ul>
+            <li>Describe the problem and its effect on students.</li>
+            <li>No names of staff or students &mdash; refer to the course or office instead.</li>
+            <li>No profanity. Posts that break the filter are blocked before sending.</li>
+            <li>Posts lock after 20 days and are deleted after 60.</li>
+          </ul>
+        </details>
+      </div>
+      <footer class="modal__footer">
+        <button type="submit" class="btn btn--ghost" formmethod="dialog" formnovalidate>Cancel</button>
+        <button type="submit" class="btn btn--accent">Post anonymously</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- Builder profile (PROFILES table) -->
+  <dialog class="modal modal--wide" id="profile-dialog" aria-labelledby="profile-dialog-title">
+    <form class="modal__inner" id="profile-form" novalidate>
+      <header class="modal__header">
+        <div>
+          <h2 id="profile-dialog-title">Your builder profile</h2>
+          <p>Shown on your pitches, applications and Spotlight posts. Never shown on the Campus Board.</p>
+        </div>
+        <button type="submit" class="icon-btn" formmethod="dialog" formnovalidate aria-label="Close">&times;</button>
+      </header>
+      <div class="modal__body">
+        <div class="field-row">
+          <div class="field">
+            <label for="profile-name">Full name</label>
+            <input type="text" id="profile-name" name="full_name" autocomplete="name" value="Nusrat Rahman" required>
+          </div>
+          <div class="field">
+            <label for="profile-email">University email</label>
+            <input type="email" id="profile-email" name="edu_email" value="nusrat.rahman@pub.ac.bd" readonly aria-describedby="profile-email-hint">
+            <p class="hint" id="profile-email-hint">Verified. This can&rsquo;t be changed.</p>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="profile-department">Department</label>
+            <select id="profile-department" name="department" required>
+              <option value="" disabled>Choose department</option>
+              <option value="CSE" selected>Computer Science &amp; Engineering (CSE)</option>
+              <option value="EEE">Electrical &amp; Electronic Engineering (EEE)</option>
+              <option value="CIV">Civil Engineering</option>
+              <option value="ARC">Architecture</option>
+              <option value="BBA">Business Administration (BBA)</option>
+              <option value="ENG">English</option>
+              <option value="LAW">Law</option>
+              <option value="ECO">Economics</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="profile-batch">Batch year</label>
+            <input type="number" id="profile-batch" name="batch_year" inputmode="numeric" min="2000" max="2035" value="2023" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="profile-skills">Skills</label>
+          <input type="text" id="profile-skills" name="skills" value="Figma, Flutter, Supabase, UX research" aria-describedby="profile-skills-hint">
+          <p class="hint" id="profile-skills-hint">Separate skills with commas. They appear as tags on your profile.</p>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="profile-github">GitHub <span class="optional">(optional)</span></label>
+            <input type="url" id="profile-github" name="github_url" placeholder="https://github.com/username" value="https://github.com/nusrat-r">
+          </div>
+          <div class="field">
+            <label for="profile-portfolio">Portfolio <span class="optional">(optional)</span></label>
+            <input type="url" id="profile-portfolio" name="portfolio_url" placeholder="https://">
+          </div>
+        </div>
+        <p class="form-message" id="profile-message" role="status" aria-live="polite"></p>
+      </div>
+      <footer class="modal__footer">
+        <button type="submit" class="btn btn--ghost" formmethod="dialog" formnovalidate>Cancel</button>
+        <button type="submit" class="btn btn--primary">Save profile</button>
+      </footer>
+    </form>
+  </dialog>
+</body>
+</html>

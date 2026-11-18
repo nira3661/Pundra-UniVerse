@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Spotlight · Pundra UniVerse (PUB Hub)</title>
+  <meta name="description" content="Hackathon wins, research papers, app launches and internships from Pundra University students.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#1f4d3a">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&amp;family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Step 3 scripts: Supabase JS v2 (CDN), then the PUB Hub modules. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="js/supabaseClient.js" defer></script>
+  <script src="js/auth.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body data-page="spotlight">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="index.html" aria-label="Pundra UniVerse home">
+        <span class="brand__mark" aria-hidden="true">PUB</span>
+        <span class="brand__text">
+          <strong>Pundra UniVerse</strong>
+          <small>PUB Hub</small>
+        </span>
+      </a>
+
+      <nav class="site-nav" aria-label="Main">
+        <ul>
+          <li><a href="index.html" aria-current="page">Spotlight</a></li>
+          <li><a href="collab.html">Collab Hub</a></li>
+          <li><a href="feedback.html">Campus Board</a></li>
+          <li><a href="hall-of-fame.html">Hall of Fame</a></li>
+        </ul>
+      </nav>
+
+      <div class="site-header__actions">
+        <button type="button" class="icon-btn" id="theme-toggle" aria-pressed="false" aria-label="Use dark theme" title="Switch colour theme">
+          <span aria-hidden="true">&#9680;</span>
+        </button>
+        <button type="button" class="user-chip member-only" id="profile-button" data-open-dialog="profile-dialog" aria-haspopup="dialog" aria-label="Open your builder profile">
+          <span class="avatar" id="user-initials" aria-hidden="true">NR</span>
+          <span class="user-chip__text">
+            <span id="user-name">Nusrat Rahman</span>
+            <small id="user-meta">CSE &middot; Batch 2023</small>
+          </span>
+        </button>
+        <button type="button" class="btn btn--ghost btn--sm member-only" id="sign-out-button">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main" id="main">
+    <!-- Restricted access: shown when body[data-auth="guest"] (set by js/auth.js). -->
+    <section class="auth-gate" id="auth-gate" aria-labelledby="auth-title">
+      <div class="card auth-card">
+        <div class="auth-card__intro">
+          <p class="eyebrow">Campus members only</p>
+          <h2 id="auth-title">Sign in to PUB Hub</h2>
+          <p>Pitches, the Campus Board and team workspaces are open to verified Pundra University members. Use your university email.</p>
+        </div>
+
+        <div class="segmented segmented--block" role="tablist" aria-label="Account">
+          <button type="button" role="tab" id="tab-login" aria-selected="true" aria-controls="login-panel">Sign in</button>
+          <button type="button" role="tab" id="tab-signup" aria-selected="false" aria-controls="signup-panel" tabindex="-1">Create account</button>
+        </div>
+
+        <div id="login-panel" role="tabpanel" aria-labelledby="tab-login">
+        <form class="form" id="login-form" novalidate>
+          <div class="field">
+            <label for="login-email">University email</label>
+            <input type="email" id="login-email" name="email" autocomplete="email" placeholder="you@pub.ac.bd" required>
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" name="password" autocomplete="current-password" required>
+          </div>
+          <div class="auth-card__row">
+            <button type="button" class="text-btn" id="forgot-password">Forgot password?</button>
+            <button type="submit" class="btn btn--primary">Sign in</button>
+          </div>
+        </form>
+        </div>
+
+        <div id="signup-panel" role="tabpanel" aria-labelledby="tab-signup" hidden>
+        <form class="form" id="signup-form" novalidate>
+          <div class="field">
+            <label for="signup-name">Full name</label>
+            <input type="text" id="signup-name" name="full_name" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="signup-email">University email</label>
+            <input type="email" id="signup-email" name="email" autocomplete="email" placeholder="you@pub.ac.bd" aria-describedby="signup-email-hint" required>
+            <p class="hint" id="signup-email-hint">Accounts are limited to .edu and .ac.bd addresses. We&rsquo;ll send a link to verify it.</p>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="signup-department">Department</label>
+              <select id="signup-department" name="department" required>
+              <option value="" disabled selected>Choose department</option>
+              <option value="CSE">Computer Science &amp; Engineering (CSE)</option>
+              <option value="EEE">Electrical &amp; Electronic Engineering (EEE)</option>
+              <option value="CIV">Civil Engineering</option>
+              <option value="ARC">Architecture</option>
+              <option value="BBA">Business Administration (BBA)</option>
+              <option value="ENG">English</option>
+              <option value="LAW">Law</option>
+              <option value="ECO">Economics</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="signup-batch">Batch year</label>
+              <input type="number" id="signup-batch" name="batch_year" inputmode="numeric" min="2000" max="2035" placeholder="2024" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="signup-password">Password</label>
+            <input type="password" id="signup-password" name="password" autocomplete="new-password" minlength="8" aria-describedby="signup-password-hint" required>
+            <p class="hint" id="signup-password-hint">At least 8 characters.</p>
+          </div>
+          <button type="submit" class="btn btn--accent btn--block">Create account</button>
+        </form>
+        </div>
+
+        <p class="form-message" id="auth-message" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <div class="app-content">
+      <section class="container page-hero" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Student Spotlight</p>
+          <h1 id="page-title">What PUB students <em>shipped</em> this week</h1>
+          <p class="lede">Hackathon wins, research papers, app launches and internships &mdash; posted by the students who earned them. Cheer the work you rate.</p>
+        </div>
+        <div class="page-hero__actions">
+          <button type="button" class="btn btn--accent" data-open-dialog="achievement-dialog" aria-haspopup="dialog">Share a milestone</button>
+          <a class="btn btn--ghost" href="#profile-summary">Your profile</a>
+        </div>
+        <dl class="stat-strip" aria-label="This month on PUB Hub">
+          <div><dt>Milestones this month</dt><dd id="stat-milestones">48</dd></div>
+          <div><dt>Cheers given</dt><dd id="stat-cheers">1,326</dd></div>
+          <div><dt>Active builders</dt><dd id="stat-builders">312</dd></div>
+          <div><dt>Open team pitches</dt><dd id="stat-pitches">19</dd></div>
+        </dl>
+      </section>
+
+      <div class="container layout layout--with-aside">
+        <section class="feed" aria-labelledby="feed-title">
+          <div class="feed__toolbar">
+            <h2 class="section-title" id="feed-title">Main feed</h2>
+            <div class="chip-group" id="milestone-filter" role="group" aria-label="Filter by milestone">
+              <button type="button" class="chip" data-filter="all" aria-pressed="true">All</button>
+              <button type="button" class="chip" data-filter="hackathon" aria-pressed="false">Hackathons</button>
+              <button type="button" class="chip" data-filter="research" aria-pressed="false">Research</button>
+              <button type="button" class="chip" data-filter="launch" aria-pressed="false">App launches</button>
+              <button type="button" class="chip" data-filter="internship" aria-pressed="false">Internships</button>
+            </div>
+          </div>
+
+          <!-- ACHIEVEMENT_POSTS feed. Sample cards below are replaced by js/app.js. -->
+          <div class="card-grid" id="achievement-feed" aria-live="polite" aria-busy="false">
+        <article class="card achievement-card" data-id="sample-1" data-milestone="hackathon">
+          <div class="card__thumb card__thumb--art" aria-hidden="true"><span>FloodWatch</span></div>
+          <header class="card__header">
+            <span class="tag tag--hackathon">Hackathon win</span>
+            <time datetime="2026-11-16">2 days ago</time>
+          </header>
+          <h3 class="card__title">Champions at the Bogura Smart City Hackathon</h3>
+          <p class="card__byline">by <a class="person-link" href="#" data-profile-id="sample-1-author">Tanvir Ahmed</a> &middot; CSE &middot; Batch 2022</p>
+          <p class="card__body">Our team built FloodWatch, an SMS alert system that reads river-level sensors and warns riverside villages six hours earlier than the current notice board.</p>
+          <ul class="link-row" aria-label="Project links">
+            <li><a class="link-pill" href="https://github.com/" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+            <li><a class="link-pill" href="#" target="_blank" rel="noopener noreferrer">Live demo</a></li>
+          </ul>
+          <footer class="cheer-bar" aria-label="Cheers">
+            <button type="button" class="cheer" data-cheer="shipped" aria-pressed="false"><span aria-hidden="true">&#128640;</span> Shipped <span class="cheer__count">31</span></button>
+            <button type="button" class="cheer" data-cheer="big_brain" aria-pressed="false"><span aria-hidden="true">&#129504;</span> Big Brain <span class="cheer__count">18</span></button>
+            <button type="button" class="cheer" data-cheer="winner" aria-pressed="true"><span aria-hidden="true">&#127942;</span> Winner <span class="cheer__count">42</span></button>
+          </footer>
+        </article>
+
+        <article class="card achievement-card" data-id="sample-2" data-milestone="research">
+          <header class="card__header">
+            <span class="tag tag--research">Research paper</span>
+            <time datetime="2026-11-15">3 days ago</time>
+          </header>
+          <h3 class="card__title">Paper accepted at ICCIT 2026</h3>
+          <p class="card__byline">by <a class="person-link" href="#" data-profile-id="sample-2-author">Farhana Akter</a> &middot; EEE &middot; Batch 2021</p>
+          <p class="card__body">A low-cost solar charge controller using fuzzy-logic MPPT, tested on 40 rooftop panels around campus. Co-authored with Dr. Kamrul Hasan.</p>
+          <ul class="link-row" aria-label="Project links">
+            <li><a class="link-pill" href="#" target="_blank" rel="noopener noreferrer">Paper</a></li>
+            <li><a class="link-pill" href="https://github.com/" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+          </ul>
+          <footer class="cheer-bar" aria-label="Cheers">
+            <button type="button" class="cheer" data-cheer="shipped" aria-pressed="false"><span aria-hidden="true">&#128640;</span> Shipped <span class="cheer__count">6</span></button>
+            <button type="button" class="cheer" data-cheer="big_brain" aria-pressed="true"><span aria-hidden="true">&#129504;</span> Big Brain <span class="cheer__count">27</span></button>
+            <button type="button" class="cheer" data-cheer="winner" aria-pressed="false"><span aria-hidden="true">&#127942;</span> Winner <span class="cheer__count">9</span></button>
+          </footer>
+        </article>
+
+        <article class="card achievement-card" data-id="sample-3" data-milestone="launch">
+          <header class="card__header">
+            <span class="tag tag--launch">App launch</span>
+            <time datetime="2026-11-13">5 days ago</time>
+          </header>
+          <h3 class="card__title">Launched PUB Routine &mdash; a class timetable app</h3>
+          <p class="card__byline">by <a class="person-link" href="#" data-profile-id="sample-3-author">Rafiul Islam</a> &middot; CSE &middot; Batch 2023</p>
+          <p class="card__body">Turns the official routine PDF into a phone timetable with room-change alerts. 1,200 installs in the first week.</p>
+          <ul class="link-row" aria-label="Project links">
+            <li><a class="link-pill" href="#" target="_blank" rel="noopener noreferrer">Live demo</a></li>
+            <li><a class="link-pill" href="https://github.com/" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+          </ul>
+          <footer class="cheer-bar" aria-label="Cheers">
+            <button type="button" class="cheer" data-cheer="shipped" aria-pressed="false"><span aria-hidden="true">&#128640;</span> Shipped <span class="cheer__count">58</span></button>
+            <button type="button" class="cheer" data-cheer="big_brain" aria-pressed="false"><span aria-hidden="true">&#129504;</span> Big Brain <span class="cheer__count">12</span></button>
+            <button type="button" class="cheer" data-cheer="winner" aria-pressed="false"><span aria-hidden="true">&#127942;</span> Winner <span class="cheer__count">4</span></button>
+          </footer>
+        </article>
+
+        <article class="card achievement-card" data-id="sample-4" data-milestone="internship">
+          <header class="card__header">
+            <span class="tag tag--internship">Internship</span>
+            <time datetime="2026-11-11">1 week ago</time>
+          </header>
+          <h3 class="card__title">Product analyst intern at a Dhaka fintech</h3>
+          <p class="card__byline">by <a class="person-link" href="#" data-profile-id="sample-4-author">Sadia Islam</a> &middot; BBA &middot; Batch 2022</p>
+          <p class="card__body">Wrote the onboarding funnel report for the payments team that shaped their Q4 roadmap. Happy to share how I applied.</p>
+          <ul class="link-row" aria-label="Project links">
+            <li><a class="link-pill" href="#" target="_blank" rel="noopener noreferrer">Portfolio</a></li>
+          </ul>
+          <footer class="cheer-bar" aria-label="Cheers">
+            <button type="button" class="cheer" data-cheer="shipped" aria-pressed="false"><span aria-hidden="true">&#128640;</span> Shipped <span class="cheer__count">9</span></button>
+            <button type="button" class="cheer" data-cheer="big_brain" aria-pressed="false"><span aria-hidden="true">&#129504;</span> Big Brain <span class="cheer__count">14</span></button>
+            <button type="button" class="cheer" data-cheer="winner" aria-pressed="false"><span aria-hidden="true">&#127942;</span> Winner <span class="cheer__count">7</span></button>
+          </footer>
+        </article>
+          </div>
+
+          <div class="empty-state" id="achievement-empty" hidden>
+            <h3>No milestones here yet</h3>
+            <p>Be the first to share one in this category.</p>
+          </div>
+
+          <div class="feed__more">
+            <button type="button" class="btn btn--ghost btn--block" id="load-more-achievements">Load more milestones</button>
+          </div>
+        </section>
+
+        <aside class="sidebar" aria-label="Your profile and campus updates">
+          <section class="card side-card profile-card" id="profile-summary" aria-labelledby="profile-summary-title">
+            <div class="profile-card__head">
+              <span class="avatar avatar--lg" aria-hidden="true">NR</span>
+              <div>
+                <h2 class="profile-card__name" id="profile-summary-title">Nusrat Rahman</h2>
+                <p class="profile-card__meta">Computer Science &amp; Engineering &middot; Batch 2023</p>
+              </div>
+            </div>
+            <ul class="tag-list" id="profile-skills-list" aria-label="Skills">
+              <li class="tag tag--plain">Figma</li>
+              <li class="tag tag--plain">Flutter</li>
+              <li class="tag tag--plain">Supabase</li>
+              <li class="tag tag--plain">UX research</li>
+            </ul>
+            <ul class="link-row" aria-label="Profile links">
+              <li><a class="link-pill" href="https://github.com/" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+            </ul>
+            <button type="button" class="btn btn--ghost btn--block" data-open-dialog="profile-dialog" aria-haspopup="dialog">Edit profile</button>
+          </section>
+
+          <section class="card side-card" aria-labelledby="hof-mini-title">
+            <h2 id="hof-mini-title">From the Hall of Fame</h2>
+            <ul class="mini-list" id="hof-mini-list">
+              <li><a href="hall-of-fame.html"><strong>PUB team ranks 7th at ICPC Asia Dhaka Regional</strong><small>CSE Department &middot; 3 days ago</small></a></li>
+              <li><a href="hall-of-fame.html"><strong>Robotics Club wins national line-follower title</strong><small>Student Council &middot; 4 days ago</small></a></li>
+              <li><a href="hall-of-fame.html"><strong>UGC grant for three faculty&ndash;student projects</strong><small>EEE Department &middot; 9 days ago</small></a></li>
+            </ul>
+          </section>
+
+          <nav class="card side-card" aria-labelledby="quick-links-title">
+            <h2 id="quick-links-title">Get involved</h2>
+            <div class="quick-links">
+              <a href="collab.html"><span>Find a team<small>19 pitches need builders</small></span></a>
+              <a href="feedback.html"><span>Raise a campus issue<small>Posted anonymously</small></span></a>
+            </div>
+          </nav>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p><strong>Pundra UniVerse</strong> &middot; PUB Hub &mdash; for verified Pundra University members.</p>
+      <nav aria-label="Footer">
+        <ul>
+          <li><a href="index.html">Spotlight</a></li>
+          <li><a href="collab.html">Collab Hub</a></li>
+          <li><a href="feedback.html">Campus Board</a></li>
+          <li><a href="hall-of-fame.html">Hall of Fame</a></li>
+        </ul>
+      </nav>
+      <p class="site-footer__note">Campus Board posts lock after 20 days and are deleted after 60 days unless an admin keeps them. Anonymous posts are never linked to your account.</p>
+    </div>
+  </footer>
+
+  <div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
+
+  <!-- Card template used by js/app.js to render ACHIEVEMENT_POSTS -->
+  <template id="achievement-card-template">
+    <article class="card achievement-card" data-id="" data-milestone="">
+      <img class="card__thumb" alt="" loading="lazy" hidden>
+      <header class="card__header">
+        <span class="tag" data-field="milestone"></span>
+        <time datetime="" data-field="created_at"></time>
+      </header>
+      <h3 class="card__title" data-field="title"></h3>
+      <p class="card__byline">by <a class="person-link" href="#" data-field="author"></a> &middot; <span data-field="author_meta"></span></p>
+      <p class="card__body" data-field="description"></p>
+      <ul class="link-row" aria-label="Project links" data-field="links"></ul>
+      <footer class="cheer-bar" aria-label="Cheers">
+        <button type="button" class="cheer" data-cheer="shipped" aria-pressed="false"><span aria-hidden="true">&#128640;</span> Shipped <span class="cheer__count">0</span></button>
+        <button type="button" class="cheer" data-cheer="big_brain" aria-pressed="false"><span aria-hidden="true">&#129504;</span> Big Brain <span class="cheer__count">0</span></button>
+        <button type="button" class="cheer" data-cheer="winner" aria-pressed="false"><span aria-hidden="true">&#127942;</span> Winner <span class="cheer__count">0</span></button>
+      </footer>
+    </article>
+  </template>
+
+  <!-- Share a milestone (ACHIEVEMENT_POSTS) -->
+  <dialog class="modal modal--wide" id="achievement-dialog" aria-labelledby="achievement-dialog-title">
+    <form class="modal__inner" id="achievement-form" novalidate>
+      <header class="modal__header">
+        <div>
+          <h2 id="achievement-dialog-title">Share a milestone</h2>
+          <p>Posted under your name and linked to your builder profile.</p>
+        </div>
+        <button type="submit" class="icon-btn" formmethod="dialog" formnovalidate aria-label="Close">&times;</button>
+      </header>
+      <div class="modal__body">
+        <div class="field">
+          <label for="achievement-title">Title</label>
+          <input type="text" id="achievement-title" name="title" maxlength="120" placeholder="e.g. Runner-up at NASA Space Apps Bogura" required>
+        </div>
+        <fieldset>
+          <legend>Milestone type</legend>
+          <div class="option-grid">
+            <label class="option"><input type="radio" name="milestone" value="hackathon" required checked><span>Hackathon win</span></label>
+            <label class="option"><input type="radio" name="milestone" value="research"><span>Research paper</span></label>
+            <label class="option"><input type="radio" name="milestone" value="launch"><span>App launch</span></label>
+            <label class="option"><input type="radio" name="milestone" value="internship"><span>Internship</span></label>
+          </div>
+        </fieldset>
+        <div class="field">
+          <label for="achievement-description">What happened?</label>
+          <textarea id="achievement-description" name="description" maxlength="600" rows="4" placeholder="What you built or achieved, and who you did it with." aria-describedby="achievement-description-count" required></textarea>
+          <div class="field__foot"><output class="field__counter" id="achievement-description-count" for="achievement-description">0 / 600</output></div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="achievement-github">GitHub <span class="optional">(optional)</span></label>
+            <input type="url" id="achievement-github" name="github_url" placeholder="https://github.com/...">
+          </div>
+          <div class="field">
+            <label for="achievement-demo">Live demo <span class="optional">(optional)</span></label>
+            <input type="url" id="achievement-demo" name="demo_url" placeholder="https://">
+          </div>
+        </div>
+        <div class="field">
+          <label for="achievement-proof">Proof or paper link</label>
+          <input type="url" id="achievement-proof" name="proof_link" placeholder="Results page, certificate or paper DOI" required>
+        </div>
+        <div class="field">
+          <label for="achievement-thumb">Thumbnail <span class="optional">(optional)</span></label>
+          <input type="file" id="achievement-thumb" name="thumbnail" accept="image/png, image/jpeg, image/webp" aria-describedby="achievement-thumb-hint">
+          <p class="hint" id="achievement-thumb-hint">PNG, JPG or WebP, up to 2 MB.</p>
+        </div>
+        <p class="form-message" id="achievement-message" role="status" aria-live="polite"></p>
+      </div>
+      <footer class="modal__footer">
+        <button type="submit" class="btn btn--ghost" formmethod="dialog" formnovalidate>Cancel</button>
+        <button type="submit" class="btn btn--accent">Post milestone</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- Builder profile (PROFILES table) -->
+  <dialog class="modal modal--wide" id="profile-dialog" aria-labelledby="profile-dialog-title">
+    <form class="modal__inner" id="profile-form" novalidate>
+      <header class="modal__header">
+        <div>
+          <h2 id="profile-dialog-title">Your builder profile</h2>
+          <p>Shown on your pitches, applications and Spotlight posts. Never shown on the Campus Board.</p>
+        </div>
+        <button type="submit" class="icon-btn" formmethod="dialog" formnovalidate aria-label="Close">&times;</button>
+      </header>
+      <div class="modal__body">
+        <div class="field-row">
+          <div class="field">
+            <label for="profile-name">Full name</label>
+            <input type="text" id="profile-name" name="full_name" autocomplete="name" value="Nusrat Rahman" required>
+          </div>
+          <div class="field">
+            <label for="profile-email">University email</label>
+            <input type="email" id="profile-email" name="edu_email" value="nusrat.rahman@pub.ac.bd" readonly aria-describedby="profile-email-hint">
+            <p class="hint" id="profile-email-hint">Verified. This can&rsquo;t be changed.</p>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="profile-department">Department</label>
+            <select id="profile-department" name="department" required>
+              <option value="" disabled>Choose department</option>
+              <option value="CSE" selected>Computer Science &amp; Engineering (CSE)</option>
+              <option value="EEE">Electrical &amp; Electronic Engineering (EEE)</option>
+              <option value="CIV">Civil Engineering</option>
+              <option value="ARC">Architecture</option>
+              <option value="BBA">Business Administration (BBA)</option>
+              <option value="ENG">English</option>
+              <option value="LAW">Law</option>
+              <option value="ECO">Economics</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="profile-batch">Batch year</label>
+            <input type="number" id="profile-batch" name="batch_year" inputmode="numeric" min="2000" max="2035" value="2023" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="profile-skills">Skills</label>
+          <input type="text" id="profile-skills" name="skills" value="Figma, Flutter, Supabase, UX research" aria-describedby="profile-skills-hint">
+          <p class="hint" id="profile-skills-hint">Separate skills with commas. They appear as tags on your profile.</p>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="profile-github">GitHub <span class="optional">(optional)</span></label>
+            <input type="url" id="profile-github" name="github_url" placeholder="https://github.com/username" value="https://github.com/nusrat-r">
+          </div>
+          <div class="field">
+            <label for="profile-portfolio">Portfolio <span class="optional">(optional)</span></label>
+            <input type="url" id="profile-portfolio" name="portfolio_url" placeholder="https://">
+          </div>
+        </div>
+        <p class="form-message" id="profile-message" role="status" aria-live="polite"></p>
+      </div>
+      <footer class="modal__footer">
+        <button type="submit" class="btn btn--ghost" formmethod="dialog" formnovalidate>Cancel</button>
+        <button type="submit" class="btn btn--primary">Save profile</button>
+      </footer>
+    </form>
+  </dialog>
+</body>
+</html>
