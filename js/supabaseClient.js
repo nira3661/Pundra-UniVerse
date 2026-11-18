@@ -2,7 +2,7 @@
  * PUB Hub — Supabase JS v2 CDN client.
  * Load the Supabase CDN script before this file, then load auth.js.
  */
-const SUPABASE_URL = "https://huxfzpkjpjwvzbvzsprl.supabase.co/rest/v1/";
+const SUPABASE_URL = "https://huxfzpkjpjwvzbvzsprl.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_HDsUisSkosdJOeUCl6ru4w_3HwGTkXO";
 
 (function initializeSupabase() {

@@ -756,3 +756,29 @@ BEGIN
 EXCEPTION
     WHEN duplicate_object THEN NULL;
 END $$;
+
+
+
+
+CREATE OR REPLACE FUNCTION public.protect_profile_privileged_fields()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF auth.uid() IS NOT NULL AND NOT EXISTS (
+        SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = TRUE
+    ) THEN
+        NEW.is_admin := OLD.is_admin;
+        NEW.is_publisher := OLD.is_publisher;
+        NEW.role := OLD.role;
+        NEW.edu_email := OLD.edu_email;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS protect_profile_roles ON public.profiles;
+CREATE TRIGGER protect_profile_roles
+    BEFORE UPDATE ON public.profiles
+    FOR EACH ROW
+    EXECUTE FUNCTION public.protect_profile_privileged_fields();
