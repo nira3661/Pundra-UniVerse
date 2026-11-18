@@ -437,19 +437,21 @@ time {
 }
 
 .brand__mark {
-  display: grid;
-  place-items: center;
+  display: block;
   width: 42px;
   height: 42px;
   border: var(--border) solid var(--card-border);
   border-radius: 10px;
-  background: var(--brand);
+  background: var(--surface);
   color: var(--on-brand);
   box-shadow: var(--shadow-pin-sm);
   font-family: var(--font-mono);
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.06em;
+  object-fit: cover;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .brand__text {

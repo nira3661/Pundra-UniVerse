@@ -8,6 +8,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#1f4d3a">
+  <link rel="icon" href="logo.jfif" type="image/jpeg">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,7 +27,7 @@
   <header class="site-header">
     <div class="container site-header__inner">
       <a class="brand" href="index.html" aria-label="Pundra UniVerse home">
-        <span class="brand__mark" aria-hidden="true">PUB</span>
+        <img class="brand__mark" src="logo.jfif" alt="PUB Logo" width="42" height="42">
         <span class="brand__text">
           <strong>Pundra UniVerse</strong>
           <small>PUB Hub</small>
@@ -47,10 +48,10 @@
           <span aria-hidden="true">&#9680;</span>
         </button>
         <button type="button" class="user-chip member-only" id="profile-button" data-open-dialog="profile-dialog" aria-haspopup="dialog" aria-label="Open your builder profile">
-          <span class="avatar" id="user-initials" aria-hidden="true">NR</span>
+          <span class="avatar" id="user-initials" aria-hidden="true">--</span>
           <span class="user-chip__text">
-            <span id="user-name">Nusrat Rahman</span>
-            <small id="user-meta">CSE &middot; Batch 2023</small>
+            <span id="user-name">Loading…</span>
+            <small id="user-meta">--</small>
           </span>
         </button>
         <button type="button" class="btn btn--ghost btn--sm member-only" id="sign-out-button">Sign out</button>
@@ -411,11 +412,11 @@
         <div class="field-row">
           <div class="field">
             <label for="profile-name">Full name</label>
-            <input type="text" id="profile-name" name="full_name" autocomplete="name" value="Nusrat Rahman" required>
+            <input type="text" id="profile-name" name="full_name" autocomplete="name" placeholder="Your full name" value="" required>
           </div>
           <div class="field">
             <label for="profile-email">University email</label>
-            <input type="email" id="profile-email" name="edu_email" value="nusrat.rahman@pub.ac.bd" readonly aria-describedby="profile-email-hint">
+            <input type="email" id="profile-email" name="edu_email" value="" readonly aria-describedby="profile-email-hint">
             <p class="hint" id="profile-email-hint">Verified. This can&rsquo;t be changed.</p>
           </div>
         </div>
@@ -423,8 +424,8 @@
           <div class="field">
             <label for="profile-department">Department</label>
             <select id="profile-department" name="department" required>
-              <option value="" disabled>Choose department</option>
-              <option value="CSE" selected>Computer Science &amp; Engineering (CSE)</option>
+              <option value="" disabled selected>Choose department</option>
+              <option value="CSE">Computer Science &amp; Engineering (CSE)</option>
               <option value="EEE">Electrical &amp; Electronic Engineering (EEE)</option>
               <option value="CIV">Civil Engineering</option>
               <option value="ARC">Architecture</option>
@@ -436,18 +437,18 @@
           </div>
           <div class="field">
             <label for="profile-batch">Batch year</label>
-            <input type="number" id="profile-batch" name="batch_year" inputmode="numeric" min="2000" max="2035" value="2023" required>
+            <input type="number" id="profile-batch" name="batch_year" inputmode="numeric" min="2000" max="2035" placeholder="e.g. 2024" value="" required>
           </div>
         </div>
         <div class="field">
           <label for="profile-skills">Skills</label>
-          <input type="text" id="profile-skills" name="skills" value="Figma, Flutter, Supabase, UX research" aria-describedby="profile-skills-hint">
+          <input type="text" id="profile-skills" name="skills" placeholder="e.g. Figma, Python, Web development" value="" aria-describedby="profile-skills-hint">
           <p class="hint" id="profile-skills-hint">Separate skills with commas. They appear as tags on your profile.</p>
         </div>
         <div class="field-row">
           <div class="field">
             <label for="profile-github">GitHub <span class="optional">(optional)</span></label>
-            <input type="url" id="profile-github" name="github_url" placeholder="https://github.com/username" value="https://github.com/nusrat-r">
+            <input type="url" id="profile-github" name="github_url" placeholder="https://github.com/username" value="">
           </div>
           <div class="field">
             <label for="profile-portfolio">Portfolio <span class="optional">(optional)</span></label>

@@ -130,10 +130,80 @@ function setRoleVisibility(profile) {
   });
 }
 
+function buildFallbackProfile(user) {
+  if (!user) return null;
+  const meta = user.user_metadata || {};
+  return {
+    id: user.id,
+    edu_email: user.email,
+    full_name: meta.full_name || (user.email ? user.email.split("@")[0] : "Student"),
+    department: meta.department || "Student",
+    batch_year: meta.batch_year ? Number(meta.batch_year) : null,
+    skills: Array.isArray(meta.skills) ? meta.skills : [],
+    github_url: meta.github_url || null,
+    role: meta.role || "student",
+    is_publisher: Boolean(meta.is_publisher),
+    is_admin: Boolean(meta.is_admin)
+  };
+}
+
+function clearProfileUI() {
+  const initialsEl = document.getElementById("user-initials");
+  const nameEl = document.getElementById("user-name");
+  const metaEl = document.getElementById("user-meta");
+  if (initialsEl) initialsEl.textContent = "--";
+  if (nameEl) nameEl.textContent = "Loading…";
+  if (metaEl) metaEl.textContent = "--";
+
+  const summaryTitle = document.getElementById("profile-summary-title");
+  if (summaryTitle) summaryTitle.textContent = "Loading…";
+  const summary = document.getElementById("profile-summary");
+  if (summary) {
+    const avatar = summary.querySelector(".avatar");
+    const summaryMeta = summary.querySelector(".profile-card__meta");
+    if (avatar) avatar.textContent = "--";
+    if (summaryMeta) summaryMeta.textContent = "--";
+
+    const skillsList = document.getElementById("profile-skills-list");
+    if (skillsList) skillsList.replaceChildren();
+
+    const githubLink = summary.querySelector(".link-row a");
+    if (githubLink) {
+      githubLink.href = "https://github.com/";
+      if (githubLink.parentElement) githubLink.parentElement.hidden = true;
+    }
+  }
+
+  const ids = [
+    "profile-name",
+    "profile-email",
+    "profile-department",
+    "profile-batch",
+    "profile-skills",
+    "profile-github",
+    "profile-portfolio"
+  ];
+  ids.forEach(id => {
+    const element = document.getElementById(id);
+    if (!element) return;
+    if (element.tagName === "SELECT") {
+      element.selectedIndex = 0;
+    } else {
+      element.value = "";
+    }
+  });
+  setRoleVisibility(null);
+}
+
 function updateProfileUI(user, profile) {
-  const name = profile.full_name || user.user_metadata?.full_name || user.email.split("@")[0];
-  const department = profile.department || user.user_metadata?.department || "Student";
-  const batch = profile.batch_year || user.user_metadata?.batch_year || "";
+  if (!user) {
+    clearProfileUI();
+    return;
+  }
+  const currentProfile = profile || buildFallbackProfile(user);
+  const name = currentProfile.full_name || user.user_metadata?.full_name || (user.email ? user.email.split("@")[0] : "Student");
+  const department = currentProfile.department || user.user_metadata?.department || "Student";
+  const batch = currentProfile.batch_year || user.user_metadata?.batch_year || "";
   const initials = getInitials(name, user.email);
 
   const initialsEl = document.getElementById("user-initials");
@@ -155,7 +225,7 @@ function updateProfileUI(user, profile) {
     const skillsList = document.getElementById("profile-skills-list");
     if (skillsList) {
       skillsList.replaceChildren();
-      (Array.isArray(profile.skills) ? profile.skills : []).forEach(skill => {
+      (Array.isArray(currentProfile.skills) ? currentProfile.skills : []).forEach(skill => {
         const item = document.createElement("li");
         item.className = "tag tag--plain";
         item.textContent = skill;
@@ -164,60 +234,67 @@ function updateProfileUI(user, profile) {
     }
     const githubLink = summary.querySelector(".link-row a");
     if (githubLink) {
-      githubLink.href = profile.github_url || "https://github.com/";
-      githubLink.parentElement.hidden = !profile.github_url;
+      githubLink.href = currentProfile.github_url || "https://github.com/";
+      if (githubLink.parentElement) {
+        githubLink.parentElement.hidden = !currentProfile.github_url;
+      }
     }
   }
 
   const values = {
     "profile-name": name,
-    "profile-email": profile.edu_email || user.email,
+    "profile-email": currentProfile.edu_email || user.email,
     "profile-department": department,
     "profile-batch": batch,
-    "profile-skills": Array.isArray(profile.skills) ? profile.skills.join(", ") : "",
-    "profile-github": profile.github_url || "",
+    "profile-skills": Array.isArray(currentProfile.skills) ? currentProfile.skills.join(", ") : "",
+    "profile-github": currentProfile.github_url || "",
     "profile-portfolio": user.user_metadata?.portfolio_url || ""
   };
   Object.entries(values).forEach(([id, value]) => {
     const element = document.getElementById(id);
-    if (element) element.value = value;
+    if (!element) return;
+    if (element.tagName === "SELECT") {
+      element.value = value;
+      if (!element.value && element.options.length > 0) {
+        element.selectedIndex = 0;
+      }
+    } else {
+      element.value = value;
+    }
   });
-  setRoleVisibility(profile);
+  setRoleVisibility(currentProfile);
 }
 
 async function loadProfile(user) {
   const client = window.PubAuth.getSupabase();
   if (!client || !user) return null;
 
-  const { data, error } = await client
-    .from("profiles")
-    .select("id, edu_email, full_name, department, batch_year, skills, github_url, role, is_publisher, is_admin")
-    .eq("id", user.id)
-    .maybeSingle();
+  try {
+    const { data, error } = await client
+      .from("profiles")
+      .select("id, edu_email, full_name, department, batch_year, skills, github_url, role, is_publisher, is_admin")
+      .eq("id", user.id)
+      .maybeSingle();
 
-  if (error) {
-    console.error("PUB Hub: Could not load profile.", error);
-    return null;
+    if (error) {
+      console.error("PUB Hub: Could not load profile.", error);
+      const fallback = buildFallbackProfile(user);
+      window.PubAuth.profile = fallback;
+      updateProfileUI(user, fallback);
+      return fallback;
+    }
+
+    const profile = data || buildFallbackProfile(user);
+    window.PubAuth.profile = profile;
+    updateProfileUI(user, profile);
+    return profile;
+  } catch (err) {
+    console.error("PUB Hub: Could not load profile.", err);
+    const fallback = buildFallbackProfile(user);
+    window.PubAuth.profile = fallback;
+    updateProfileUI(user, fallback);
+    return fallback;
   }
-
-  // schema.sql creates profiles with handle_new_user(). Do not silently insert
-  // a duplicate/fallback row if that trigger or the RLS policy reports an issue.
-  const profile = data || {
-    id: user.id,
-    edu_email: user.email,
-    full_name: user.user_metadata?.full_name || user.email.split("@")[0],
-    department: user.user_metadata?.department || "General",
-    batch_year: user.user_metadata?.batch_year || null,
-    skills: [],
-    github_url: null,
-    role: "student",
-    is_publisher: false,
-    is_admin: false
-  };
-
-  window.PubAuth.profile = profile;
-  updateProfileUI(user, profile);
-  return profile;
 }
 
 function setAuthState(session) {
@@ -227,10 +304,11 @@ function setAuthState(session) {
   document.body.dataset.auth = user ? "member" : "guest";
   if (user) {
     renderWatermark(user.email);
+    updateProfileUI(user, window.PubAuth.profile || buildFallbackProfile(user));
   } else {
     window.PubAuth.profile = null;
     renderWatermark(null);
-    setRoleVisibility(null);
+    clearProfileUI();
   }
 }
 
@@ -461,16 +539,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   }
 
-  client.auth.onAuthStateChange(async (_event, session) => {
+  client.auth.onAuthStateChange((_event, session) => {
     setAuthState(session);
-    if (session?.user) {
-      await loadProfile(session.user);
-    }
-    window.PubAuth.authReady = true;
-    document.dispatchEvent(
-      new CustomEvent('pub:auth-ready', {
-        detail: { user: window.PubAuth.user, profile: window.PubAuth.profile }
-      })
-    );
+    setTimeout(async () => {
+      if (session?.user) {
+        await loadProfile(session.user);
+      }
+      window.PubAuth.authReady = true;
+      document.dispatchEvent(
+        new CustomEvent('pub:auth-ready', {
+          detail: { user: window.PubAuth.user, profile: window.PubAuth.profile }
+        })
+      );
+    }, 0);
   });
 });
