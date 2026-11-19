@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS public.project_pitches (
     description TEXT NOT NULL,
     roles_needed TEXT[] DEFAULT '{}'::TEXT[],
     tech_stack TEXT[] DEFAULT '{}'::TEXT[],
+    team_size INT DEFAULT 4,
     status TEXT DEFAULT 'open' CHECK (status IN ('open', 'in_progress', 'completed', 'closed')),
     thumbnail_url TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -850,10 +851,11 @@ CREATE POLICY "Users can delete own hall of fame reactions"
     USING (auth.uid() = user_id);
 
 -- ---------------------------------------------------------------------------
--- 10.1  campus_feedback — add author_hash column (anonymous edit/delete)
+-- 10.1  campus_feedback & project_pitches column additions
 -- ---------------------------------------------------------------------------
 
 ALTER TABLE public.campus_feedback ADD COLUMN IF NOT EXISTS author_hash TEXT;
+ALTER TABLE public.project_pitches ADD COLUMN IF NOT EXISTS team_size INT DEFAULT 4;
 
 -- ---------------------------------------------------------------------------
 -- 10.2  campus_feedback_votes — new table (anonymous upvote deduplication)

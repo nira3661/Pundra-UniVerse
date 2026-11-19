@@ -10,10 +10,11 @@
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- Ensure JSONB count columns exist
+-- Ensure JSONB count columns & missing columns exist
 ALTER TABLE public.achievement_posts ADD COLUMN IF NOT EXISTS cheer_counts JSONB DEFAULT '{"shipped": 0, "big_brain": 0, "winner": 0}'::jsonb;
 ALTER TABLE public.hall_of_fame ADD COLUMN IF NOT EXISTS reaction_counts JSONB DEFAULT '{"applaud": 0, "celebrate": 0, "inspiring": 0}'::jsonb;
 ALTER TABLE public.campus_feedback ADD COLUMN IF NOT EXISTS upvotes_count INT DEFAULT 0;
+ALTER TABLE public.project_pitches ADD COLUMN IF NOT EXISTS team_size INT DEFAULT 4;
 
 CREATE TABLE IF NOT EXISTS public.achievement_cheers (
     post_id UUID NOT NULL REFERENCES public.achievement_posts(id) ON DELETE CASCADE,

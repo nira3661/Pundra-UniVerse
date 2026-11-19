@@ -1036,17 +1036,93 @@ async function loadAchievements(append = false) {
           title,
           description,
           roles_needed: checkedRoles,
-          tech_stack: stack || [],
-          team_size: teamSize
+          tech_stack: stack || []
         };
         if (thumbnailUrl) {
           updates.thumbnail_url = thumbnailUrl;
         }
 
+        let updatedPitch = null;
+        try {
+          const { data, error } = await sb
+            .from('project_pitches')
+            .update({ ...updates, team_size: teamSize })
+            .eq('id', editingPitchId)
+            .select(`
+              id,
+              creator_id,
+              title,
+              description,
+              roles_needed,
+              tech_stack,
+              team_size,
+              status,
+              thumbnail_url,
+              created_at,
+              creator:profiles(id, full_name, department, batch_year)
+            `)
+            .single();
+
+          if (error) throw error;
+          updatedPitch = data;
+        } catch (updateErr) {
+          if (updateErr.message && updateErr.message.includes('team_size')) {
+            const { data, error } = await sb
+              .from('project_pitches')
+              .update(updates)
+              .eq('id', editingPitchId)
+              .select(`
+                id,
+                creator_id,
+                title,
+                description,
+                roles_needed,
+                tech_stack,
+                status,
+                thumbnail_url,
+                created_at,
+                creator:profiles(id, full_name, department, batch_year)
+              `)
+              .single();
+            if (error) throw error;
+            updatedPitch = data;
+          } else {
+            throw updateErr;
+          }
+        }
+
+        const idx = pitchesData.findIndex(p => p.id === editingPitchId);
+        if (idx !== -1) {
+          pitchesData[idx] = {
+            ...pitchesData[idx],
+            ...updatedPitch
+          };
+        }
+        filterPitches();
+        await loadWorkspaces();
+        form.reset();
+
+        const dialog = document.getElementById('pitch-dialog');
+        if (dialog) dialog.close();
+        editingPitchId = null;
+        showToast('Project pitch updated! 🚀', 'success');
+        return;
+      }
+
+      let newPitch = null;
+      try {
         const { data, error } = await sb
           .from('project_pitches')
-          .update(updates)
-          .eq('id', editingPitchId)
+          .insert({
+            creator_id: user.id,
+            title,
+            description,
+            roles_needed: checkedRoles,
+            tech_stack: stack || [],
+            team_size: teamSize,
+            thumbnail_url: thumbnailUrl,
+            status: 'open'
+          })
           .select(`
             id,
             creator_id,
@@ -1063,55 +1139,42 @@ async function loadAchievements(append = false) {
           .single();
 
         if (error) throw error;
+        newPitch = data;
+      } catch (insertErr) {
+        if (insertErr.message && insertErr.message.includes('team_size')) {
+          const { data, error } = await sb
+            .from('project_pitches')
+            .insert({
+              creator_id: user.id,
+              title,
+              description,
+              roles_needed: checkedRoles,
+              tech_stack: stack || [],
+              thumbnail_url: thumbnailUrl,
+              status: 'open'
+            })
+            .select(`
+              id,
+              creator_id,
+              title,
+              description,
+              roles_needed,
+              tech_stack,
+              status,
+              thumbnail_url,
+              created_at,
+              creator:profiles(id, full_name, department, batch_year)
+            `)
+            .single();
 
-        const idx = pitchesData.findIndex(p => p.id === editingPitchId);
-        if (idx !== -1) {
-          pitchesData[idx] = {
-            ...pitchesData[idx],
-            ...data
-          };
+          if (error) throw error;
+          newPitch = data;
+        } else {
+          throw insertErr;
         }
-        filterPitches();
-        await loadWorkspaces();
-        form.reset();
-
-        const dialog = document.getElementById('pitch-dialog');
-        if (dialog) dialog.close();
-        editingPitchId = null;
-        showToast('Project pitch updated! 🚀', 'success');
-        return;
       }
 
-      const { data, error } = await sb
-        .from('project_pitches')
-        .insert({
-          creator_id: user.id,
-          title,
-          description,
-          roles_needed: checkedRoles,
-          tech_stack: stack || [],
-          team_size: teamSize,
-          thumbnail_url: thumbnailUrl,
-          status: 'open'
-        })
-        .select(`
-          id,
-          creator_id,
-          title,
-          description,
-          roles_needed,
-          tech_stack,
-          team_size,
-          status,
-          thumbnail_url,
-          created_at,
-          creator:profiles(id, full_name, department, batch_year)
-        `)
-        .single();
-
-      if (error) throw error;
-
-      pitchesData.unshift(data);
+      pitchesData.unshift(newPitch);
       renderPitches(pitchesData);
       form.reset();
 
