@@ -12,7 +12,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&amp;family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&amp;family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&amp;family=Caveat:wght@600&amp;family=Instrument+Serif:ital@1&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
   <link rel="stylesheet" href="css/style.css">
 
   <!-- Step 3 scripts: Supabase JS v2 (CDN), then the PUB Hub modules. -->
@@ -62,91 +62,129 @@
   <main class="site-main" id="main">
     <!-- Restricted access: shown when body[data-auth="guest"] (set by js/auth.js). -->
     <section class="auth-gate" id="auth-gate" aria-labelledby="auth-title">
-      <div class="card auth-card">
-        <div class="auth-card__intro">
-          <p class="eyebrow">Campus members only</p>
-          <h2 id="auth-title">Sign in to PUB Hub</h2>
-          <p>Pitches, the Campus Board and team workspaces are open to verified Pundra University members. Use your university email.</p>
-        </div>
-
-        <div class="segmented segmented--block" role="tablist" aria-label="Account">
-          <button type="button" role="tab" id="tab-login" aria-selected="true" aria-controls="login-panel">Sign in</button>
-          <button type="button" role="tab" id="tab-signup" aria-selected="false" aria-controls="signup-panel" tabindex="-1">Create account</button>
-        </div>
-
-        <div id="login-panel" role="tabpanel" aria-labelledby="tab-login">
-        <form class="form" id="login-form" novalidate>
-          <div class="field">
-            <label for="login-email">University email</label>
-            <input type="email" id="login-email" name="email" autocomplete="email" placeholder="you@pub.ac.bd" required>
+      <div class="card auth-shell">
+        <aside class="auth-showcase" aria-hidden="true">
+          <!-- REPLACE PHOTO: Swap with a real convocation or award ceremony photo -->
+          <img class="auth-showcase__photo"
+            src="https://images.unsplash.com/photo-1627556704290-2b1f5853ff78?auto=format&amp;fit=crop&amp;w=1000&amp;q=80"
+            alt="">
+          <div class="auth-showcase__top">
+            <span class="auth-showcase__stamp">Hall of Fame &middot; Official Record</span>
           </div>
-          <div class="field">
-            <label for="login-password">Password</label>
-            <input type="password" id="login-password" name="password" autocomplete="current-password" required>
-          </div>
-          <div class="auth-card__row">
-            <button type="button" class="text-btn" id="forgot-password">Forgot password?</button>
-            <button type="submit" class="btn btn--primary">Sign in</button>
-          </div>
-        </form>
-        </div>
-
-        <div id="signup-panel" role="tabpanel" aria-labelledby="tab-signup" hidden>
-        <form class="form" id="signup-form" novalidate>
-          <div class="field">
-            <label for="signup-name">Full name</label>
-            <input type="text" id="signup-name" name="full_name" autocomplete="name" required>
-          </div>
-          <div class="field">
-            <label for="signup-email">University email</label>
-            <input type="email" id="signup-email" name="email" autocomplete="email" placeholder="you@pub.ac.bd" aria-describedby="signup-email-hint" required>
-            <p class="hint" id="signup-email-hint">Accounts are limited to .edu and .ac.bd addresses. We&rsquo;ll send a link to verify it.</p>
-          </div>
-          <div class="field-row">
-            <div class="field">
-              <label for="signup-department">Department</label>
-              <select id="signup-department" name="department" required>
-              <option value="" disabled selected>Choose department</option>
-              <option value="CSE">Computer Science &amp; Engineering (CSE)</option>
-              <option value="EEE">Electrical &amp; Electronic Engineering (EEE)</option>
-              <option value="CIV">Civil Engineering</option>
-              <option value="ARC">Architecture</option>
-              <option value="BBA">Business Administration (BBA)</option>
-              <option value="ENG">English</option>
-              <option value="LAW">Law</option>
-              <option value="ECO">Economics</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="signup-batch">Batch year</label>
-              <input type="number" id="signup-batch" name="batch_year" inputmode="numeric" min="2000" max="2035" placeholder="2024" required>
+          <div class="auth-showcase__bottom">
+            <p class="auth-showcase__quote">Every national win and grant, <em>preserved</em> for campus.</p>
+            <ul class="auth-showcase__list">
+              <li>Contest Wins</li>
+              <li>Research Grants</li>
+              <li>Club Trophies</li>
+            </ul>
+            <div class="auth-showcase__credit">
+              <span>Celebrating PUB milestones</span>
+              <span class="mono">Verified announcements</span>
             </div>
           </div>
-          <div class="field">
-            <label for="signup-password">Password</label>
-            <input type="password" id="signup-password" name="password" autocomplete="new-password" minlength="8" aria-describedby="signup-password-hint" required>
-            <p class="hint" id="signup-password-hint">At least 8 characters.</p>
-          </div>
-          <button type="submit" class="btn btn--accent btn--block">Create account</button>
-        </form>
-        </div>
+        </aside>
 
-        <p class="form-message" id="auth-message" role="status" aria-live="polite"></p>
+        <div class="auth-card">
+          <div class="auth-card__intro">
+            <p class="eyebrow">Campus members only</p>
+            <h2 id="auth-title">Sign in to PUB Hub</h2>
+            <p>Pitches, the Campus Board and team workspaces are open to verified Pundra University members. Use your university email.</p>
+          </div>
+
+          <div class="segmented segmented--block" role="tablist" aria-label="Account">
+            <button type="button" role="tab" id="tab-login" aria-selected="true" aria-controls="login-panel">Sign in</button>
+            <button type="button" role="tab" id="tab-signup" aria-selected="false" aria-controls="signup-panel" tabindex="-1">Create account</button>
+          </div>
+
+          <div id="login-panel" role="tabpanel" aria-labelledby="tab-login">
+          <form class="form" id="login-form" novalidate>
+            <div class="field">
+              <label for="login-email">University email</label>
+              <input type="email" id="login-email" name="email" autocomplete="email" placeholder="you@pub.ac.bd" required>
+            </div>
+            <div class="field">
+              <label for="login-password">Password</label>
+              <input type="password" id="login-password" name="password" autocomplete="current-password" required>
+            </div>
+            <div class="auth-card__row">
+              <button type="button" class="text-btn" id="forgot-password">Forgot password?</button>
+              <button type="submit" class="btn btn--primary">Sign in</button>
+            </div>
+          </form>
+          </div>
+
+          <div id="signup-panel" role="tabpanel" aria-labelledby="tab-signup" hidden>
+          <form class="form" id="signup-form" novalidate>
+            <div class="field">
+              <label for="signup-name">Full name</label>
+              <input type="text" id="signup-name" name="full_name" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="signup-email">University email</label>
+              <input type="email" id="signup-email" name="email" autocomplete="email" placeholder="you@pub.ac.bd" aria-describedby="signup-email-hint" required>
+              <p class="hint" id="signup-email-hint">Accounts are limited to .edu and .ac.bd addresses. We&rsquo;ll send a link to verify it.</p>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="signup-department">Department</label>
+                <select id="signup-department" name="department" required>
+                <option value="" disabled selected>Choose department</option>
+                <option value="CSE">Computer Science &amp; Engineering (CSE)</option>
+                <option value="EEE">Electrical &amp; Electronic Engineering (EEE)</option>
+                <option value="CIV">Civil Engineering</option>
+                <option value="ARC">Architecture</option>
+                <option value="BBA">Business Administration (BBA)</option>
+                <option value="ENG">English</option>
+                <option value="LAW">Law</option>
+                <option value="ECO">Economics</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="signup-batch">Batch year</label>
+                <input type="number" id="signup-batch" name="batch_year" inputmode="numeric" min="2000" max="2035" placeholder="2024" required>
+              </div>
+            </div>
+            <div class="field">
+              <label for="signup-password">Password</label>
+              <input type="password" id="signup-password" name="password" autocomplete="new-password" minlength="8" aria-describedby="signup-password-hint" required>
+              <p class="hint" id="signup-password-hint">At least 8 characters.</p>
+            </div>
+            <button type="submit" class="btn btn--accent btn--block">Create account</button>
+          </form>
+          </div>
+
+          <p class="form-message" id="auth-message" role="status" aria-live="polite"></p>
+        </div>
       </div>
     </section>
 
     <div class="app-content">
-      <section class="container page-hero" aria-labelledby="page-title">
-        <div>
+      <section class="container page-hero page-hero--visual" aria-labelledby="page-title">
+        <div class="page-hero__copy">
           <p class="eyebrow">The Hall of Fame</p>
           <h1 id="page-title">Official wins, <em>on the record.</em></h1>
           <p class="lede">Announcements from department heads, the Student Council and club leads. React to celebrate &mdash; comments are off so the record stays clean.</p>
+          <div class="page-hero__actions">
+            <p class="readonly-note">Read-only &middot; reactions on, comments off</p>
+            <!-- Authorized Publisher only (is_publisher). js/auth.js removes hidden. -->
+            <button type="button" class="btn btn--accent" id="publish-button" data-requires-role="publisher" data-open-dialog="publish-dialog" aria-haspopup="dialog" hidden>Publish announcement</button>
+          </div>
         </div>
-        <div class="page-hero__actions">
-          <p class="readonly-note">Read-only &middot; reactions on, comments off</p>
-          <!-- Authorized Publisher only (is_publisher). js/auth.js removes hidden. -->
-          <button type="button" class="btn btn--accent" id="publish-button" data-requires-role="publisher" data-open-dialog="publish-dialog" aria-haspopup="dialog" hidden>Publish announcement</button>
-        </div>
+
+        <figure class="polaroid">
+          <div class="polaroid__frame">
+            <!-- REPLACE PHOTO: Swap with a real photo of PUB students celebrating a win or convocation -->
+            <img
+              src="https://images.unsplash.com/photo-1750566523677-244921008882?auto=format&amp;fit=crop&amp;w=900&amp;q=80"
+              alt="Graduates celebrating together in a university hallway" loading="eager">
+            <span class="polaroid__stamp">PUB Pride</span>
+          </div>
+          <figcaption class="polaroid__caption">
+            <span class="polaroid__note">Trophies, grants &amp; big days</span>
+            <span class="polaroid__meta">Archive</span>
+          </figcaption>
+        </figure>
       </section>
 
       <div class="container">
@@ -154,6 +192,10 @@
           <h2 class="visually-hidden" id="featured-title">Featured announcement</h2>
           <article class="card broadcast-featured" data-id="" data-category="">
             <div class="broadcast-featured__art" aria-hidden="true">
+              <!-- REPLACE PHOTO: Optional archival background photo for the featured Hall of Fame card -->
+              <img class="broadcast-featured__photo"
+                src="https://images.unsplash.com/photo-1627556704290-2b1f5853ff78?auto=format&amp;fit=crop&amp;w=900&amp;q=80"
+                alt="" loading="lazy">
               <span class="broadcast-featured__rank"></span>
               <span class="broadcast-featured__caption"></span>
             </div>
@@ -210,7 +252,10 @@
 
   <footer class="site-footer">
     <div class="container site-footer__inner">
-      <p><strong>Pundra UniVerse</strong> &middot; PUB Hub &mdash; for verified Pundra University members.</p>
+      <div class="site-footer__colophon">
+        <p><strong>Pundra UniVerse</strong> &middot; PUB Hub &mdash; crafted by &amp; for verified Pundra University members.</p>
+        <span class="site-footer__loc">Gokul, Bogura</span>
+      </div>
       <nav aria-label="Footer">
         <ul>
           <li><a href="index.html">Spotlight</a></li>
