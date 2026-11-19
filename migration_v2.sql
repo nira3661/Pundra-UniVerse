@@ -5,6 +5,73 @@
 -- ============================================================================
 
 -- ============================================================================
+-- SECTION 0: Required Extensions & Reaction Tracking Tables
+-- ============================================================================
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- Ensure JSONB count columns exist
+ALTER TABLE public.achievement_posts ADD COLUMN IF NOT EXISTS cheer_counts JSONB DEFAULT '{"shipped": 0, "big_brain": 0, "winner": 0}'::jsonb;
+ALTER TABLE public.hall_of_fame ADD COLUMN IF NOT EXISTS reaction_counts JSONB DEFAULT '{"applaud": 0, "celebrate": 0, "inspiring": 0}'::jsonb;
+ALTER TABLE public.campus_feedback ADD COLUMN IF NOT EXISTS upvotes_count INT DEFAULT 0;
+
+CREATE TABLE IF NOT EXISTS public.achievement_cheers (
+    post_id UUID NOT NULL REFERENCES public.achievement_posts(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    cheer_type TEXT NOT NULL CHECK (cheer_type IN ('shipped', 'big_brain', 'winner')),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (post_id, user_id, cheer_type)
+);
+
+CREATE INDEX IF NOT EXISTS idx_achievement_cheers_user ON public.achievement_cheers(user_id);
+CREATE INDEX IF NOT EXISTS idx_achievement_cheers_post ON public.achievement_cheers(post_id);
+
+ALTER TABLE public.achievement_cheers ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view achievement cheers" ON public.achievement_cheers;
+CREATE POLICY "Users can view achievement cheers"
+    ON public.achievement_cheers FOR SELECT TO authenticated
+    USING (true);
+
+DROP POLICY IF EXISTS "Users can insert own achievement cheers" ON public.achievement_cheers;
+CREATE POLICY "Users can insert own achievement cheers"
+    ON public.achievement_cheers FOR INSERT TO authenticated
+    WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users can delete own achievement cheers" ON public.achievement_cheers;
+CREATE POLICY "Users can delete own achievement cheers"
+    ON public.achievement_cheers FOR DELETE TO authenticated
+    USING (auth.uid() = user_id);
+
+CREATE TABLE IF NOT EXISTS public.hall_of_fame_reactions (
+    hof_id UUID NOT NULL REFERENCES public.hall_of_fame(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    reaction_type TEXT NOT NULL CHECK (reaction_type IN ('applaud', 'celebrate', 'inspiring')),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (hof_id, user_id, reaction_type)
+);
+
+CREATE INDEX IF NOT EXISTS idx_hof_reactions_user ON public.hall_of_fame_reactions(user_id);
+CREATE INDEX IF NOT EXISTS idx_hof_reactions_hof ON public.hall_of_fame_reactions(hof_id);
+
+ALTER TABLE public.hall_of_fame_reactions ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view hall of fame reactions" ON public.hall_of_fame_reactions;
+CREATE POLICY "Users can view hall of fame reactions"
+    ON public.hall_of_fame_reactions FOR SELECT TO authenticated
+    USING (true);
+
+DROP POLICY IF EXISTS "Users can insert own hall of fame reactions" ON public.hall_of_fame_reactions;
+CREATE POLICY "Users can insert own hall of fame reactions"
+    ON public.hall_of_fame_reactions FOR INSERT TO authenticated
+    WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users can delete own hall of fame reactions" ON public.hall_of_fame_reactions;
+CREATE POLICY "Users can delete own hall of fame reactions"
+    ON public.hall_of_fame_reactions FOR DELETE TO authenticated
+    USING (auth.uid() = user_id);
+
+-- ============================================================================
 -- SECTION 1: campus_feedback — add author_hash column
 -- ============================================================================
 
