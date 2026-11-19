@@ -252,7 +252,7 @@ $$;
 CREATE OR REPLACE FUNCTION public.toggle_feedback_upvote(p_feedback_id UUID)
 RETURNS JSONB
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 LANGUAGE plpgsql
 AS $$
 DECLARE
@@ -268,8 +268,8 @@ BEGIN
         RETURN jsonb_build_object('success', false, 'error', 'Must be authenticated');
     END IF;
 
-    -- Compute salted hash of user+feedback (never store raw user_id)
-    v_voter_hash := encode(digest(v_user_id::text || ':' || p_feedback_id::text || ':pub-hub-vote-salt', 'sha256'), 'hex');
+    -- Compute salted hash of user+feedback using PostgreSQL core sha256 (never store raw user_id)
+    v_voter_hash := encode(sha256((v_user_id::text || ':' || p_feedback_id::text || ':pub-hub-vote-salt')::bytea), 'hex');
 
     SELECT is_locked, EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400
     INTO v_locked, v_age_days
@@ -324,7 +324,7 @@ $$;
 CREATE OR REPLACE FUNCTION public.get_my_feedback_votes()
 RETURNS UUID[]
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 LANGUAGE plpgsql
 AS $$
 DECLARE
@@ -337,7 +337,7 @@ BEGIN
         SELECT cfv.feedback_id
         FROM public.campus_feedback_votes cfv
         WHERE cfv.voter_hash = encode(
-            digest(v_user_id::text || ':' || cfv.feedback_id::text || ':pub-hub-vote-salt', 'sha256'),
+            sha256((v_user_id::text || ':' || cfv.feedback_id::text || ':pub-hub-vote-salt')::bytea),
             'hex'
         )
     );
@@ -355,13 +355,13 @@ CREATE OR REPLACE FUNCTION public.submit_feedback(
 )
 RETURNS JSONB
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_user_id    UUID;
+    v_user_id     UUID;
     v_author_hash TEXT;
-    v_new_id     UUID;
+    v_new_id      UUID;
 BEGIN
     v_user_id := auth.uid();
     IF v_user_id IS NULL THEN
@@ -372,7 +372,7 @@ BEGIN
         RETURN jsonb_build_object('success', false, 'error', 'Invalid category');
     END IF;
 
-    v_author_hash := encode(digest(v_user_id::text || ':pub-hub-author-salt', 'sha256'), 'hex');
+    v_author_hash := encode(sha256((v_user_id::text || ':pub-hub-author-salt')::bytea), 'hex');
 
     INSERT INTO public.campus_feedback (anonymous_handle, category, content, upvotes_count, is_locked, admin_keep, author_hash)
     VALUES (p_anonymous_handle, p_category, p_content, 0, false, false, v_author_hash)
@@ -389,20 +389,20 @@ $$;
 CREATE OR REPLACE FUNCTION public.delete_my_feedback(p_feedback_id UUID)
 RETURNS JSONB
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_user_id    UUID;
+    v_user_id     UUID;
     v_author_hash TEXT;
-    v_is_locked  BOOLEAN;
+    v_is_locked   BOOLEAN;
 BEGIN
     v_user_id := auth.uid();
     IF v_user_id IS NULL THEN
         RETURN jsonb_build_object('success', false, 'error', 'Must be authenticated');
     END IF;
 
-    v_author_hash := encode(digest(v_user_id::text || ':pub-hub-author-salt', 'sha256'), 'hex');
+    v_author_hash := encode(sha256((v_user_id::text || ':pub-hub-author-salt')::bytea), 'hex');
 
     SELECT is_locked INTO v_is_locked
     FROM public.campus_feedback
@@ -433,13 +433,13 @@ $$;
 CREATE OR REPLACE FUNCTION public.edit_my_feedback(p_feedback_id UUID, p_content TEXT)
 RETURNS JSONB
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_user_id    UUID;
+    v_user_id     UUID;
     v_author_hash TEXT;
-    v_is_locked  BOOLEAN;
+    v_is_locked   BOOLEAN;
 BEGIN
     v_user_id := auth.uid();
     IF v_user_id IS NULL THEN
@@ -450,7 +450,7 @@ BEGIN
         RETURN jsonb_build_object('success', false, 'error', 'Content too short');
     END IF;
 
-    v_author_hash := encode(digest(v_user_id::text || ':pub-hub-author-salt', 'sha256'), 'hex');
+    v_author_hash := encode(sha256((v_user_id::text || ':pub-hub-author-salt')::bytea), 'hex');
 
     SELECT is_locked INTO v_is_locked
     FROM public.campus_feedback
@@ -479,17 +479,17 @@ $$;
 CREATE OR REPLACE FUNCTION public.get_my_feedback_ids()
 RETURNS UUID[]
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_user_id    UUID;
+    v_user_id     UUID;
     v_author_hash TEXT;
 BEGIN
     v_user_id := auth.uid();
     IF v_user_id IS NULL THEN RETURN '{}'::UUID[]; END IF;
 
-    v_author_hash := encode(digest(v_user_id::text || ':pub-hub-author-salt', 'sha256'), 'hex');
+    v_author_hash := encode(sha256((v_user_id::text || ':pub-hub-author-salt')::bytea), 'hex');
 
     RETURN ARRAY(
         SELECT id FROM public.campus_feedback WHERE author_hash = v_author_hash
