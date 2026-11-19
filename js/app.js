@@ -235,7 +235,7 @@
           thumbnail_url,
           cheer_counts,
           created_at,
-          author:profiles(id, full_name, department, batch_year)
+          author:profiles!author_id(id, full_name, department, batch_year)
         `)
         .order('created_at', { ascending: false })
         .limit(30);
@@ -623,7 +623,7 @@
           status,
           thumbnail_url,
           created_at,
-          creator:profiles(id, full_name, department, batch_year)
+          creator:profiles!creator_id(id, full_name, department, batch_year)
         `)
         .order('created_at', { ascending: false });
 
@@ -2022,7 +2022,7 @@
           is_featured,
           reaction_counts,
           created_at,
-          publisher:profiles(id, full_name, department, role)
+          publisher:profiles!publisher_id(id, full_name, department, role)
         `)
         .order('created_at', { ascending: false });
 
