@@ -450,7 +450,18 @@
       const { data, error } = await sb
         .from('achievement_posts')
         .insert(newPost)
-
+        .select(`
+          id,
+          author_id,
+          title,
+          description,
+          milestone_tag,
+          proof_link,
+          thumbnail_url,
+          cheer_counts,
+          created_at,
+          author:profiles(id, full_name, department, batch_year)
+        `)
         .single();
 
       if (error) throw error;
