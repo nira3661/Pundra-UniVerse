@@ -831,6 +831,30 @@
     }
   }
 
+  function updateApplyDialogAttachedProfile(user = getCurrentUser(), profile = getCurrentProfile()) {
+    const dialog = document.getElementById('apply-dialog');
+    if (!dialog) return;
+    const attached = dialog.querySelector('.attached-profile');
+    if (!attached) return;
+
+    if (!user && !profile) {
+      attached.innerHTML = `
+        <span class="avatar" aria-hidden="true">--</span>
+        <div><strong>Loading…</strong><small>Profile details attach automatically</small></div>
+      `;
+      return;
+    }
+
+    const fullName = profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Student';
+    const dept = profile?.department || user?.user_metadata?.department || 'Student';
+    const batch = profile?.batch_year ? `Batch ${profile.batch_year}` : (user?.user_metadata?.batch_year ? `Batch ${user.user_metadata.batch_year}` : '');
+    const skills = Array.isArray(profile?.skills) ? profile.skills.join(', ') : '';
+    attached.innerHTML = `
+      <span class="avatar">${escapeHtml(fullName.slice(0, 2).toUpperCase())}</span>
+      <div><strong>${escapeHtml(fullName)}</strong><small>${escapeHtml(dept)} · ${escapeHtml(batch)} · ${escapeHtml(skills)}</small></div>
+    `;
+  }
+
   function setupApplyModalForPitch(pitchId) {
     const pitch = pitchesData.find(p => p.id === pitchId);
     const dialog = document.getElementById('apply-dialog');
@@ -856,19 +880,7 @@
         .join('');
     }
 
-    if (dialog && profile) {
-      const attached = dialog.querySelector('.attached-profile');
-      if (attached) {
-        const fullName = profile.full_name || user?.email?.split('@')[0];
-        const dept = profile.department || 'Student';
-        const batch = profile.batch_year ? `Batch ${profile.batch_year}` : '';
-        const skills = (profile.skills || []).join(', ');
-        attached.innerHTML = `
-          <span class="avatar">${escapeHtml(fullName.slice(0, 2).toUpperCase())}</span>
-          <div><strong>${escapeHtml(fullName)}</strong><small>${escapeHtml(dept)} · ${escapeHtml(batch)} · ${escapeHtml(skills)}</small></div>
-        `;
-      }
-    }
+    updateApplyDialogAttachedProfile(user, profile);
   }
 
   async function handleApplySubmit(e) {
@@ -2241,6 +2253,8 @@
   }
 
   function handleAuthReady(user, profile) {
+    updateApplyDialogAttachedProfile(user, profile);
+
     if (!user) {
       activePageLoadedUser = null;
       return; // Do not run authenticated Supabase queries while user is null
@@ -2262,6 +2276,45 @@
   // Listen for pub:auth-ready dispatched from js/auth.js
   document.addEventListener('pub:auth-ready', event => {
     handleAuthReady(event.detail?.user, event.detail?.profile);
+  });
+
+  // Listen for pub:profile-updated dispatched from js/auth.js
+  document.addEventListener('pub:profile-updated', event => {
+    const user = event.detail?.user || getCurrentUser();
+    const profile = event.detail?.profile || getCurrentProfile();
+
+    updateApplyDialogAttachedProfile(user, profile);
+
+    const page = document.body?.dataset.page;
+    if (page === 'feedback') {
+      updateAnonymousHandleUI();
+    } else if (page === 'spotlight' && user && Array.isArray(achievementsData)) {
+      let changed = false;
+      achievementsData.forEach(post => {
+        if (post.author_id === user.id && post.author) {
+          post.author.full_name = profile?.full_name || post.author.full_name;
+          post.author.department = profile?.department || post.author.department;
+          post.author.batch_year = profile?.batch_year || post.author.batch_year;
+          changed = true;
+        }
+      });
+      if (changed) {
+        renderAchievements();
+      }
+    } else if (page === 'collab' && user && Array.isArray(pitchesData)) {
+      let changed = false;
+      pitchesData.forEach(pitch => {
+        if (pitch.creator_id === user.id && pitch.creator) {
+          pitch.creator.full_name = profile?.full_name || pitch.creator.full_name;
+          pitch.creator.department = profile?.department || pitch.creator.department;
+          pitch.creator.batch_year = profile?.batch_year || pitch.creator.batch_year;
+          changed = true;
+        }
+      });
+      if (changed) {
+        renderPitches(pitchesData);
+      }
+    }
   });
 
   // Handle case where pub:auth-ready fired before this listener was attached

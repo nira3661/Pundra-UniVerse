@@ -188,179 +188,19 @@
           </div>
           <div class="chip-group filter-row" id="category-filter" role="group" aria-label="Filter by category">
             <button type="button" class="chip" data-filter="all" aria-pressed="true">All <span
-                class="chip__count">86</span></button>
+                class="chip__count">0</span></button>
             <button type="button" class="chip" data-filter="faculty" aria-pressed="false">Faculty &amp; Grading <span
-                class="chip__count">21</span></button>
+                class="chip__count">0</span></button>
             <button type="button" class="chip" data-filter="labs" aria-pressed="false">Labs &amp; Equipment <span
-                class="chip__count">29</span></button>
+                class="chip__count">0</span></button>
             <button type="button" class="chip" data-filter="facilities" aria-pressed="false">Facilities <span
-                class="chip__count">24</span></button>
+                class="chip__count">0</span></button>
             <button type="button" class="chip" data-filter="admin" aria-pressed="false">Administration <span
-                class="chip__count">12</span></button>
+                class="chip__count">0</span></button>
           </div>
 
           <!-- CAMPUS_FEEDBACK stream. Sample posts below are replaced by js/app.js. -->
           <ol class="feedback-list" id="feedback-feed" aria-live="polite" aria-busy="false">
-            <li>
-              <article class="card feedback-card" data-id="fb-1" data-category="labs" data-locked="false">
-                <div class="vote">
-                  <button type="button" class="vote__btn" aria-pressed="true" aria-label="Upvote, 128 votes"><span
-                      aria-hidden="true">&#9650;</span></button>
-                  <span class="vote__count" aria-hidden="true">128</span>
-                </div>
-                <div>
-                  <h3 class="visually-hidden">Labs &amp; Equipment feedback from Anon-CSE-442</h3>
-                  <header class="feedback-card__meta">
-                    <span class="handle">Anon-CSE-442</span>
-                    <span class="tag tag--labs">Labs &amp; Equipment</span>
-                    <time datetime="2026-11-12">6 days ago</time>
-                  </header>
-                  <p class="feedback-card__content">Half the PCs in Lab 3 still can&rsquo;t run Android Studio. We lose
-                    the first 30 minutes of every mobile dev lab waiting for emulators. An 8&nbsp;GB RAM upgrade would
-                    fix most of them.</p>
-                  <footer class="feedback-card__footer">
-                    <div class="lifecycle">
-                      <span class="lifecycle__track" aria-hidden="true"><span class="lifecycle__fill"
-                          style="--progress: 30%"></span></span>
-                      <span>Locks in 14 days</span>
-                    </div>
-                    <!-- System Administrator tools (is_admin) -->
-                    <div class="admin-tools" data-requires-role="admin" hidden>
-                      <label class="toggle"><input type="checkbox" name="admin_keep"> Keep past 60 days</label>
-                      <button type="button" class="btn btn--ghost btn--sm" data-action="flag">Flag</button>
-                    </div>
-                  </footer>
-                </div>
-              </article>
-            </li>
-            <li>
-              <article class="card feedback-card" data-id="fb-2" data-category="facilities" data-locked="false">
-                <div class="vote">
-                  <button type="button" class="vote__btn" aria-pressed="false" aria-label="Upvote, 96 votes"><span
-                      aria-hidden="true">&#9650;</span></button>
-                  <span class="vote__count" aria-hidden="true">96</span>
-                </div>
-                <div>
-                  <h3 class="visually-hidden">Facilities feedback from Anon-EEE-117</h3>
-                  <header class="feedback-card__meta">
-                    <span class="handle">Anon-EEE-117</span>
-                    <span class="tag tag--facilities">Facilities</span>
-                    <time datetime="2026-11-16">2 days ago</time>
-                  </header>
-                  <p class="feedback-card__content">The water filter on the 4th floor of the academic building has been
-                    out for two weeks. Students are buying bottled water between classes.</p>
-                  <footer class="feedback-card__footer">
-                    <div class="lifecycle">
-                      <span class="lifecycle__track" aria-hidden="true"><span class="lifecycle__fill"
-                          style="--progress: 10%"></span></span>
-                      <span>Locks in 18 days</span>
-                    </div>
-                    <!-- System Administrator tools (is_admin) -->
-                    <div class="admin-tools" data-requires-role="admin" hidden>
-                      <label class="toggle"><input type="checkbox" name="admin_keep"> Keep past 60 days</label>
-                      <button type="button" class="btn btn--ghost btn--sm" data-action="flag">Flag</button>
-                    </div>
-                  </footer>
-                </div>
-              </article>
-            </li>
-            <li>
-              <article class="card feedback-card" data-id="fb-3" data-category="faculty" data-locked="false">
-                <div class="vote">
-                  <button type="button" class="vote__btn" aria-pressed="false" aria-label="Upvote, 74 votes"><span
-                      aria-hidden="true">&#9650;</span></button>
-                  <span class="vote__count" aria-hidden="true">74</span>
-                </div>
-                <div>
-                  <h3 class="visually-hidden">Faculty &amp; Grading feedback from Anon-BBA-305</h3>
-                  <header class="feedback-card__meta">
-                    <span class="handle">Anon-BBA-305</span>
-                    <span class="tag tag--faculty">Faculty &amp; Grading</span>
-                    <time datetime="2026-11-09">9 days ago</time>
-                  </header>
-                  <p class="feedback-card__content">Could mid-term marks be published within two weeks? In two of my
-                    courses we sat the final without knowing where we stood.</p>
-                  <footer class="feedback-card__footer">
-                    <div class="lifecycle">
-                      <span class="lifecycle__track" aria-hidden="true"><span class="lifecycle__fill"
-                          style="--progress: 45%"></span></span>
-                      <span>Locks in 11 days</span>
-                    </div>
-                    <!-- System Administrator tools (is_admin) -->
-                    <div class="admin-tools" data-requires-role="admin" hidden>
-                      <label class="toggle"><input type="checkbox" name="admin_keep"> Keep past 60 days</label>
-                      <button type="button" class="btn btn--ghost btn--sm" data-action="flag">Flag</button>
-                    </div>
-                  </footer>
-                </div>
-              </article>
-            </li>
-            <li>
-              <article class="card feedback-card is-locked is-kept" data-id="fb-4" data-category="admin"
-                data-locked="true">
-                <div class="vote">
-                  <button type="button" class="vote__btn" aria-pressed="false" aria-label="Upvote, 211 votes"
-                    disabled><span aria-hidden="true">&#9650;</span></button>
-                  <span class="vote__count" aria-hidden="true">211</span>
-                </div>
-                <div>
-                  <h3 class="visually-hidden">Administration feedback from Anon-CSE-208</h3>
-                  <header class="feedback-card__meta">
-                    <span class="handle">Anon-CSE-208</span>
-                    <span class="tag tag--admin">Administration</span>
-                    <span class="badge badge--locked">Locked &middot; read-only</span>
-                    <span class="badge badge--kept">Kept by admin</span>
-                    <time datetime="2026-10-25">24 days ago</time>
-                  </header>
-                  <p class="feedback-card__content">The registration portal crashes on day one every semester. Opening
-                    slots by batch over two days would spread the load.</p>
-                  <footer class="feedback-card__footer">
-                    <div class="lifecycle">
-                      <span class="lifecycle__track" aria-hidden="true"><span class="lifecycle__fill"
-                          style="--progress: 100%"></span></span>
-                      <span>Kept past 60 days</span>
-                    </div>
-                    <!-- System Administrator tools (is_admin) -->
-                    <div class="admin-tools" data-requires-role="admin" hidden>
-                      <label class="toggle"><input type="checkbox" name="admin_keep" checked> Keep past 60 days</label>
-                      <button type="button" class="btn btn--ghost btn--sm" data-action="flag">Flag</button>
-                    </div>
-                  </footer>
-                </div>
-              </article>
-            </li>
-            <li>
-              <article class="card feedback-card is-locked" data-id="fb-5" data-category="labs" data-locked="true">
-                <div class="vote">
-                  <button type="button" class="vote__btn" aria-pressed="false" aria-label="Upvote, 40 votes"
-                    disabled><span aria-hidden="true">&#9650;</span></button>
-                  <span class="vote__count" aria-hidden="true">40</span>
-                </div>
-                <div>
-                  <h3 class="visually-hidden">Labs &amp; Equipment feedback from Anon-CIV-061</h3>
-                  <header class="feedback-card__meta">
-                    <span class="handle">Anon-CIV-061</span>
-                    <span class="tag tag--labs">Labs &amp; Equipment</span>
-                    <span class="badge badge--locked">Locked &middot; read-only</span>
-                    <time datetime="2026-10-18">31 days ago</time>
-                  </header>
-                  <p class="feedback-card__content">Surveying lab total stations need recalibration &mdash; readings
-                    drift by several centimetres over a 100&nbsp;m traverse.</p>
-                  <footer class="feedback-card__footer">
-                    <div class="lifecycle">
-                      <span class="lifecycle__track" aria-hidden="true"><span class="lifecycle__fill"
-                          style="--progress: 52%"></span></span>
-                      <span>Deleted in 29 days</span>
-                    </div>
-                    <!-- System Administrator tools (is_admin) -->
-                    <div class="admin-tools" data-requires-role="admin" hidden>
-                      <label class="toggle"><input type="checkbox" name="admin_keep"> Keep past 60 days</label>
-                      <button type="button" class="btn btn--ghost btn--sm" data-action="flag">Flag</button>
-                    </div>
-                  </footer>
-                </div>
-              </article>
-            </li>
           </ol>
 
           <div class="empty-state" id="feedback-empty" hidden>
@@ -399,9 +239,6 @@
           <section class="card side-card" aria-labelledby="trending-title">
             <h2 id="trending-title">Trending this week</h2>
             <ol class="rank-list" id="trending-list">
-              <li><span>Lab 3 PCs can&rsquo;t run Android Studio</span><span class="rank-list__votes">128</span></li>
-              <li><span>4th-floor water filter out for two weeks</span><span class="rank-list__votes">96</span></li>
-              <li><span>Publish mid-term marks within two weeks</span><span class="rank-list__votes">74</span></li>
             </ol>
           </section>
         </aside>

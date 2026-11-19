@@ -276,21 +276,42 @@ async function loadProfile(user) {
       .eq("id", user.id)
       .maybeSingle();
 
+    const existing = window.PubAuth.profile;
+
     if (error) {
       console.error("PUB Hub: Could not load profile.", error);
-      const fallback = buildFallbackProfile(user);
+      const fallback = existing || buildFallbackProfile(user);
       window.PubAuth.profile = fallback;
       updateProfileUI(user, fallback);
       return fallback;
     }
 
-    const profile = data || buildFallbackProfile(user);
+    if (!data) {
+      const fallback = existing || buildFallbackProfile(user);
+      window.PubAuth.profile = fallback;
+      updateProfileUI(user, fallback);
+      return fallback;
+    }
+
+    const profile = {
+      ...(existing || {}),
+      ...data,
+      full_name: data.full_name || user.user_metadata?.full_name || existing?.full_name || (user.email ? user.email.split("@")[0] : "Student"),
+      department: data.department || user.user_metadata?.department || existing?.department || "Student",
+      batch_year: data.batch_year ?? (user.user_metadata?.batch_year ? Number(user.user_metadata.batch_year) : (existing?.batch_year ?? null)),
+      skills: Array.isArray(data.skills) && data.skills.length > 0 ? data.skills : (existing?.skills || []),
+      github_url: data.github_url ?? existing?.github_url ?? null,
+      role: data.role || existing?.role || "student",
+      is_publisher: Boolean(data.is_publisher ?? existing?.is_publisher),
+      is_admin: Boolean(data.is_admin ?? existing?.is_admin)
+    };
+
     window.PubAuth.profile = profile;
     updateProfileUI(user, profile);
     return profile;
   } catch (err) {
     console.error("PUB Hub: Could not load profile.", err);
-    const fallback = buildFallbackProfile(user);
+    const fallback = window.PubAuth.profile || buildFallbackProfile(user);
     window.PubAuth.profile = fallback;
     updateProfileUI(user, fallback);
     return fallback;
@@ -440,11 +461,25 @@ function setupProfileDialog() {
   const dialog = document.getElementById("profile-dialog");
   const form = document.getElementById("profile-form");
 
+  const populateProfileForm = () => {
+    const user = window.PubAuth.user;
+    const profile = window.PubAuth.profile;
+    if (user) {
+      updateProfileUI(user, profile);
+    }
+  };
+
   document.querySelectorAll('[data-open-dialog="profile-dialog"]').forEach(button => {
     button.addEventListener("click", () => {
       setMessage("profile-message");
+      populateProfileForm();
       if (dialog && !dialog.open) dialog.showModal();
     });
+  });
+
+  dialog?.addEventListener("close", () => {
+    setMessage("profile-message");
+    populateProfileForm();
   });
 
   form?.addEventListener("submit", async event => {
@@ -471,33 +506,91 @@ function setupProfileDialog() {
 
     const button = form.querySelector("button.btn--primary");
     if (button) { button.disabled = true; button.textContent = "Saving…"; }
+
+    let profileData = null;
+    let dbError = null;
+
     try {
-      const { data, error } = await client.from("profiles").update({
+      const { data, error } = await client.from("profiles").upsert({
+        id: user.id,
+        edu_email: user.email,
         full_name,
         department,
         batch_year,
         skills,
         github_url,
         updated_at: new Date().toISOString()
-      }).eq("id", user.id).select().single();
-      if (error) throw error;
+      }, { onConflict: "id" }).select().single();
 
-      // portfolio_url is not a column in schema.sql, so keep it in Auth metadata.
-      const { error: metadataError } = await client.auth.updateUser({
+      if (error) {
+        dbError = error;
+        console.error("PUB Hub: Profiles upsert failed.", error);
+      } else {
+        profileData = data;
+      }
+    } catch (err) {
+      dbError = err;
+      console.error("PUB Hub: Profiles upsert exception.", err);
+    }
+
+    // Always attempt auth.updateUser metadata update so session metadata stays in sync
+    let authError = null;
+    try {
+      const { data: authData, error: metadataError } = await client.auth.updateUser({
         data: { full_name, department, batch_year, portfolio_url }
       });
-      if (metadataError) throw metadataError;
-
-      window.PubAuth.profile = data;
-      updateProfileUI(user, data);
-      setMessage("profile-message", "Profile saved.", "success");
-      window.setTimeout(() => { if (dialog?.open) dialog.close(); }, 700);
-    } catch (error) {
-      console.error("PUB Hub: Profile update failed.", error);
-      setMessage("profile-message", error.message || "Could not save your profile.", "error");
-    } finally {
-      if (button) { button.disabled = false; button.textContent = "Save profile"; }
+      if (metadataError) {
+        authError = metadataError;
+        console.error("PUB Hub: auth.updateUser metadata update failed.", metadataError);
+      } else if (authData?.user) {
+        window.PubAuth.user = authData.user;
+      }
+    } catch (err) {
+      authError = err;
+      console.error("PUB Hub: auth.updateUser exception.", err);
     }
+
+    // If database upsert failed, surface the exact error without closing the dialog
+    if (dbError) {
+      setMessage("profile-message", dbError.message || "Could not save profile to database.", "error");
+      if (button) { button.disabled = false; button.textContent = "Save profile"; }
+      return;
+    }
+
+    if (authError && !profileData) {
+      setMessage("profile-message", authError.message || "Could not update user metadata.", "error");
+      if (button) { button.disabled = false; button.textContent = "Save profile"; }
+      return;
+    }
+
+    const savedProfile = profileData || {
+      id: window.PubAuth.user.id,
+      edu_email: window.PubAuth.user.email,
+      full_name,
+      department,
+      batch_year,
+      skills,
+      github_url,
+      role: window.PubAuth.profile?.role || "student",
+      is_publisher: Boolean(window.PubAuth.profile?.is_publisher),
+      is_admin: Boolean(window.PubAuth.profile?.is_admin)
+    };
+
+    window.PubAuth.profile = savedProfile;
+    updateProfileUI(window.PubAuth.user, savedProfile);
+    setMessage("profile-message", "Profile saved.", "success");
+
+    // Dispatch custom event so app modules stay updated
+    document.dispatchEvent(
+      new CustomEvent("pub:profile-updated", {
+        detail: { user: window.PubAuth.user, profile: savedProfile }
+      })
+    );
+
+    window.setTimeout(() => {
+      if (dialog?.open) dialog.close();
+      if (button) { button.disabled = false; button.textContent = "Save profile"; }
+    }, 700);
   });
 }
 
