@@ -188,11 +188,13 @@
   let activeMilestoneFilter = 'all';
   let achievementsData = [];
   let userCheersSet = new Set();
+  let editingAchievementId = null;
 
   async function initSpotlightPage() {
     const filterGroup = document.getElementById('milestone-filter');
     const form = document.getElementById('achievement-form');
     const loadMoreBtn = document.getElementById('load-more-achievements');
+    const dialog = document.getElementById('achievement-dialog');
 
     if (filterGroup) {
       filterGroup.addEventListener('click', e => {
@@ -208,6 +210,19 @@
 
     if (form) {
       form.addEventListener('submit', handleAchievementSubmit);
+    }
+
+    if (dialog) {
+      dialog.addEventListener('close', () => {
+        editingAchievementId = null;
+        const titleEl = document.getElementById('achievement-dialog-title');
+        if (titleEl) titleEl.textContent = 'Share a milestone';
+        if (form) {
+          form.reset();
+          const submitBtn = form.querySelector('button.btn--accent');
+          if (submitBtn) submitBtn.textContent = 'Post milestone';
+        }
+      });
     }
 
     if (loadMoreBtn) {
@@ -364,8 +379,84 @@ async function loadAchievements(append = false) {
         btn.addEventListener('click', () => handleCheerClick(post.id, btn.dataset.cheer, btn));
       });
 
+      const user = getCurrentUser();
+      const isAdmin = window.PubAuth && typeof window.PubAuth.isAdmin === 'function' ? window.PubAuth.isAdmin() : false;
+      const isAuthor = user && post.author_id === user.id;
+
+      if (user && (isAuthor || isAdmin)) {
+        const actionsBar = document.createElement('div');
+        actionsBar.className = 'owner-actions';
+        actionsBar.innerHTML = `
+          <span class="owner-actions__label">${isAuthor ? 'Your post' : 'Admin'}</span>
+          ${isAuthor ? `<button type="button" class="btn btn--ghost btn--xs btn-edit-achievement" data-id="${post.id}">Edit</button>` : ''}
+          <button type="button" class="btn btn--ghost btn--xs btn--danger btn-delete-achievement" data-id="${post.id}">Delete</button>
+        `;
+        const editBtn = actionsBar.querySelector('.btn-edit-achievement');
+        if (editBtn) {
+          editBtn.addEventListener('click', () => openEditAchievementDialog(post));
+        }
+        const delBtn = actionsBar.querySelector('.btn-delete-achievement');
+        if (delBtn) {
+          delBtn.addEventListener('click', () => handleDeleteAchievement(post.id));
+        }
+        article.appendChild(actionsBar);
+      }
+
       feed.appendChild(clone);
     });
+  }
+
+  function openEditAchievementDialog(post) {
+    const dialog = document.getElementById('achievement-dialog');
+    const form = document.getElementById('achievement-form');
+    if (!dialog || !form) return;
+
+    editingAchievementId = post.id;
+    const titleEl = document.getElementById('achievement-dialog-title');
+    if (titleEl) titleEl.textContent = 'Edit milestone';
+
+    const titleInput = form.querySelector('#achievement-title');
+    if (titleInput) titleInput.value = post.title || '';
+
+    const tagRadio = form.querySelector(`input[name="milestone"][value="${post.milestone_tag}"]`);
+    if (tagRadio) tagRadio.checked = true;
+
+    const descInput = form.querySelector('#achievement-description');
+    if (descInput) {
+      descInput.value = post.description || '';
+      const countEl = document.getElementById('achievement-description-count');
+      if (countEl) countEl.textContent = `${descInput.value.length} / 600`;
+    }
+
+    const proofInput = form.querySelector('#achievement-proof');
+    if (proofInput) proofInput.value = post.proof_link || '';
+
+    const submitBtn = form.querySelector('button.btn--accent');
+    if (submitBtn) submitBtn.textContent = 'Save changes';
+
+    const msgEl = document.getElementById('achievement-message');
+    if (msgEl) msgEl.textContent = '';
+
+    dialog.showModal();
+  }
+
+  async function handleDeleteAchievement(postId) {
+    if (!confirm('Are you sure you want to delete this milestone post? This action cannot be undone.')) return;
+    const sb = getSupabase();
+    if (!sb) return;
+
+    try {
+      const { error } = await sb.from('achievement_posts').delete().eq('id', postId);
+      if (error) throw error;
+
+      achievementsData = achievementsData.filter(p => p.id !== postId);
+      renderAchievements();
+      loadSpotlightStats();
+      showToast('Milestone post deleted.', 'info');
+    } catch (err) {
+      console.error('Delete milestone error:', err);
+      showToast(err.message || 'Could not delete milestone.', 'error');
+    }
   }
 
   async function handleCheerClick(postId, cheerType, button) {
@@ -377,6 +468,9 @@ async function loadAchievements(append = false) {
       return;
     }
 
+    if (button.disabled) return;
+    button.disabled = true;
+
     try {
       const { data, error } = await sb.rpc('increment_cheer', {
         p_post_id: postId,
@@ -386,9 +480,15 @@ async function loadAchievements(append = false) {
       if (error) throw error;
 
       if (data && data.success) {
-        const countEl = button.querySelector('.cheer__count');
-        if (countEl && data.cheer_counts) {
-          countEl.textContent = data.cheer_counts[cheerType] || 0;
+        // Recompute all 3 cheer counts from the returned cheer_counts
+        const article = button.closest('article');
+        if (article && data.cheer_counts) {
+          ['shipped', 'big_brain', 'winner'].forEach(ct => {
+            const btn = article.querySelector(`[data-cheer="${ct}"]`);
+            if (btn) {
+              btn.querySelector('.cheer__count').textContent = data.cheer_counts[ct] || 0;
+            }
+          });
         }
         const isActive = Boolean(data.active);
         button.setAttribute('aria-pressed', String(isActive));
@@ -401,10 +501,14 @@ async function loadAchievements(append = false) {
           showToast('Cheer removed.', 'info');
         }
         loadSpotlightStats();
+      } else {
+        showToast(data?.error || 'Could not cheer.', 'error');
       }
     } catch (err) {
       console.error('Cheer error:', err);
       showToast(err.message || 'Could not cheer.', 'error');
+    } finally {
+      button.disabled = false;
     }
   }
 
@@ -439,13 +543,49 @@ async function loadAchievements(append = false) {
 
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Posting…';
+      submitBtn.textContent = editingAchievementId ? 'Saving…' : 'Posting…';
     }
 
     try {
       let thumbnailUrl = null;
       if (thumbFile) {
         thumbnailUrl = await uploadImageToStorage(thumbFile, 'achievements');
+      }
+
+      if (editingAchievementId) {
+        const updates = {
+          title,
+          milestone_tag: milestone,
+          description,
+          proof_link
+        };
+        if (thumbnailUrl) {
+          updates.thumbnail_url = thumbnailUrl;
+        }
+
+        const { data, error } = await sb
+          .from('achievement_posts')
+          .update(updates)
+          .eq('id', editingAchievementId)
+          .select('*')
+          .single();
+
+        if (error) throw error;
+
+        const idx = achievementsData.findIndex(p => p.id === editingAchievementId);
+        if (idx !== -1) {
+          achievementsData[idx] = {
+            ...achievementsData[idx],
+            ...data
+          };
+        }
+        renderAchievements();
+        form.reset();
+        const dialog = document.getElementById('achievement-dialog');
+        if (dialog) dialog.close();
+        editingAchievementId = null;
+        showToast('Milestone updated! ✨', 'success');
+        return;
       }
 
       const newPost = {
@@ -458,7 +598,7 @@ async function loadAchievements(append = false) {
         cheer_counts: { shipped: 0, big_brain: 0, winner: 0 }
       };
 
-const { data, error } = await sb
+      const { data, error } = await sb
         .from('achievement_posts')
         .insert(newPost)
         .select('*')
@@ -486,15 +626,15 @@ const { data, error } = await sb
       showToast('Milestone posted to Student Spotlight! 🚀', 'success');
       loadSpotlightStats();
     } catch (err) {
-      console.error('Post achievement error:', err);
+      console.error('Post/edit achievement error:', err);
       if (msgEl) {
         msgEl.className = 'form-message form-message--error';
-        msgEl.textContent = err.message || 'Could not post milestone.';
+        msgEl.textContent = err.message || 'Could not save milestone.';
       }
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Post milestone';
+        submitBtn.textContent = editingAchievementId ? 'Save changes' : 'Post milestone';
       }
     }
   }
@@ -581,11 +721,13 @@ const { data, error } = await sb
   let currentPitchFilter = 'all';
   let activeWorkspacePitchId = null;
   let workspaceRealtimeChannel = null;
+  let editingPitchId = null;
 
   async function initCollabPage() {
     const searchForm = document.getElementById('pitch-search');
     const roleFilterGroup = document.getElementById('role-filter');
     const pitchForm = document.getElementById('pitch-form');
+    const pitchDialog = document.getElementById('pitch-dialog');
     const applyForm = document.getElementById('apply-form');
     const messageForm = document.getElementById('message-form');
     const taskForm = document.getElementById('task-form');
@@ -610,6 +752,19 @@ const { data, error } = await sb
     if (applyForm) applyForm.addEventListener('submit', handleApplySubmit);
     if (messageForm) messageForm.addEventListener('submit', handleWorkspaceMessageSubmit);
     if (taskForm) taskForm.addEventListener('submit', handleTaskSubmit);
+
+    if (pitchDialog) {
+      pitchDialog.addEventListener('close', () => {
+        editingPitchId = null;
+        const titleEl = document.getElementById('pitch-dialog-title');
+        if (titleEl) titleEl.textContent = 'Pitch a project';
+        if (pitchForm) {
+          pitchForm.reset();
+          const submitBtn = pitchForm.querySelector('button.btn--accent');
+          if (submitBtn) submitBtn.textContent = 'Publish pitch';
+        }
+      });
+    }
 
     setupTaskCheckboxes();
   }
@@ -719,8 +874,89 @@ const { data, error } = await sb
         });
       }
 
+      const user = getCurrentUser();
+      const isAdmin = window.PubAuth && typeof window.PubAuth.isAdmin === 'function' ? window.PubAuth.isAdmin() : false;
+      const isCreator = user && pitch.creator_id === user.id;
+
+      if (user && (isCreator || isAdmin)) {
+        const actionsBar = document.createElement('div');
+        actionsBar.className = 'owner-actions';
+        actionsBar.innerHTML = `
+          <span class="owner-actions__label">${isCreator ? 'Your project' : 'Admin'}</span>
+          ${isCreator ? `<button type="button" class="btn btn--ghost btn--xs btn-edit-pitch" data-id="${pitch.id}">Edit</button>` : ''}
+          <button type="button" class="btn btn--ghost btn--xs btn--danger btn-delete-pitch" data-id="${pitch.id}">Delete</button>
+        `;
+        const editBtn = actionsBar.querySelector('.btn-edit-pitch');
+        if (editBtn) {
+          editBtn.addEventListener('click', () => openEditPitchDialog(pitch));
+        }
+        const delBtn = actionsBar.querySelector('.btn-delete-pitch');
+        if (delBtn) {
+          delBtn.addEventListener('click', () => handleDeletePitch(pitch.id));
+        }
+        article.appendChild(actionsBar);
+      }
+
       grid.appendChild(clone);
     });
+  }
+
+  function openEditPitchDialog(pitch) {
+    const dialog = document.getElementById('pitch-dialog');
+    const form = document.getElementById('pitch-form');
+    if (!dialog || !form) return;
+
+    editingPitchId = pitch.id;
+    const titleEl = document.getElementById('pitch-dialog-title');
+    if (titleEl) titleEl.textContent = 'Edit project pitch';
+
+    const titleInput = form.querySelector('#pitch-title');
+    if (titleInput) titleInput.value = pitch.title || '';
+
+    const descInput = form.querySelector('#pitch-description');
+    if (descInput) {
+      descInput.value = pitch.description || '';
+      const countEl = document.getElementById('pitch-description-count');
+      if (countEl) countEl.textContent = `${descInput.value.length} / 800`;
+    }
+
+    const roles = pitch.roles_needed || [];
+    form.querySelectorAll('input[name="roles_needed"]').forEach(cb => {
+      cb.checked = roles.includes(cb.value);
+    });
+
+    const stackInput = form.querySelector('#pitch-stack');
+    if (stackInput) stackInput.value = (pitch.tech_stack || []).join(', ');
+
+    const sizeInput = form.querySelector('#pitch-size');
+    if (sizeInput) sizeInput.value = pitch.team_size || 4;
+
+    const submitBtn = form.querySelector('button.btn--accent');
+    if (submitBtn) submitBtn.textContent = 'Save changes';
+
+    const msgEl = document.getElementById('pitch-message');
+    if (msgEl) msgEl.textContent = '';
+
+    dialog.showModal();
+  }
+
+  async function handleDeletePitch(pitchId) {
+    if (!confirm('Are you sure you want to delete this project pitch? All associated applications will also be removed.')) return;
+    const sb = getSupabase();
+    if (!sb) return;
+
+    try {
+      const { error } = await sb.from('project_pitches').delete().eq('id', pitchId);
+      if (error) throw error;
+
+      pitchesData = pitchesData.filter(p => p.id !== pitchId);
+      filterPitches();
+      loadWorkspaces();
+      showToast('Project pitch deleted.', 'info');
+    } catch (err) {
+      console.error('Delete pitch error:', err);
+      showToast(err.message || 'Could not delete pitch.', 'error');
+    }
   }
 
   function filterPitches() {
@@ -783,14 +1019,67 @@ const { data, error } = await sb
 
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Publishing…';
+      submitBtn.textContent = editingPitchId ? 'Saving…' : 'Publishing…';
     }
 
     try {
       const thumbFile = form.querySelector('#pitch-thumb')?.files?.[0];
+      const sizeInput = form.querySelector('#pitch-size');
+      const teamSize = sizeInput ? parseInt(sizeInput.value, 10) || 4 : 4;
       let thumbnailUrl = null;
       if (thumbFile) {
         thumbnailUrl = await uploadImageToStorage(thumbFile, 'pitches');
+      }
+
+      if (editingPitchId) {
+        const updates = {
+          title,
+          description,
+          roles_needed: checkedRoles,
+          tech_stack: stack || [],
+          team_size: teamSize
+        };
+        if (thumbnailUrl) {
+          updates.thumbnail_url = thumbnailUrl;
+        }
+
+        const { data, error } = await sb
+          .from('project_pitches')
+          .update(updates)
+          .eq('id', editingPitchId)
+          .select(`
+            id,
+            creator_id,
+            title,
+            description,
+            roles_needed,
+            tech_stack,
+            team_size,
+            status,
+            thumbnail_url,
+            created_at,
+            creator:profiles(id, full_name, department, batch_year)
+          `)
+          .single();
+
+        if (error) throw error;
+
+        const idx = pitchesData.findIndex(p => p.id === editingPitchId);
+        if (idx !== -1) {
+          pitchesData[idx] = {
+            ...pitchesData[idx],
+            ...data
+          };
+        }
+        filterPitches();
+        await loadWorkspaces();
+        form.reset();
+
+        const dialog = document.getElementById('pitch-dialog');
+        if (dialog) dialog.close();
+        editingPitchId = null;
+        showToast('Project pitch updated! 🚀', 'success');
+        return;
       }
 
       const { data, error } = await sb
@@ -801,6 +1090,7 @@ const { data, error } = await sb
           description,
           roles_needed: checkedRoles,
           tech_stack: stack || [],
+          team_size: teamSize,
           thumbnail_url: thumbnailUrl,
           status: 'open'
         })
@@ -811,6 +1101,7 @@ const { data, error } = await sb
           description,
           roles_needed,
           tech_stack,
+          team_size,
           status,
           thumbnail_url,
           created_at,
@@ -829,15 +1120,15 @@ const { data, error } = await sb
       showToast('Project pitch published! Recruit your team now. 🚀', 'success');
       await loadWorkspaces();
     } catch (err) {
-      console.error('Pitch creation error:', err);
+      console.error('Pitch save error:', err);
       if (msgEl) {
         msgEl.className = 'form-message form-message--error';
-        msgEl.textContent = err.message || 'Could not publish pitch.';
+        msgEl.textContent = err.message || 'Could not save pitch.';
       }
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Publish pitch';
+        submitBtn.textContent = editingPitchId ? 'Save changes' : 'Publish pitch';
       }
     }
   }
@@ -1412,6 +1703,8 @@ const { data, error } = await sb
   let feedbackData = [];
   let currentFeedbackCategory = 'all';
   let currentFeedbackSort = 'trending';
+  let userVotedFeedbackIds = new Set();
+  let userAuthoredFeedbackIds = new Set();
 
   const PROFANITY_PATTERN = /\b(bitch|bastard|fuck|shit|asshole|damn|crap|cunt|dick|whore|piss|scam|fraud|idiot|stupid)\b/i;
   const PERSONAL_NAME_PREFIXES = /\b(dr\.?|prof\.?|professor|sir|madam|mr\.?|mrs\.?|ms\.?|dean|chairman|chairperson|engr\.?)\s+[a-z]{2,}/i;
@@ -1513,6 +1806,19 @@ const { data, error } = await sb
     if (form) {
       form.addEventListener('submit', handleFeedbackSubmit);
     }
+
+    const editForm = document.getElementById('edit-feedback-form');
+    if (editForm) {
+      editForm.addEventListener('submit', handleEditFeedbackSubmit);
+    }
+
+    const editContentTextarea = document.getElementById('edit-feedback-content');
+    if (editContentTextarea) {
+      editContentTextarea.addEventListener('input', () => {
+        const countEl = document.getElementById('edit-feedback-content-count');
+        if (countEl) countEl.textContent = `${editContentTextarea.value.length} / 1000`;
+      });
+    }
   }
 
   function validateFeedbackInput(text) {
@@ -1537,22 +1843,6 @@ const { data, error } = await sb
     return true;
   }
 
-  function getUpvotedFeedbackIds() {
-    try {
-      const raw = localStorage.getItem('pub_hub_upvoted_feedback');
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      return [];
-    }
-  }
-
-  function addUpvotedFeedbackId(id) {
-    const ids = getUpvotedFeedbackIds();
-    if (!ids.includes(id)) {
-      ids.push(id);
-      localStorage.setItem('pub_hub_upvoted_feedback', JSON.stringify(ids));
-    }
-  }
 
   async function loadCampusFeedback() {
     const feed = document.getElementById('feedback-feed');
@@ -1570,6 +1860,33 @@ const { data, error } = await sb
       if (error) throw error;
 
       feedbackData = data || [];
+
+      // Load server-side votes for this user
+      const user = getCurrentUser();
+      userVotedFeedbackIds = new Set();
+      if (user) {
+        try {
+          const { data: votedIds, error: voteErr } = await sb.rpc('get_my_feedback_votes');
+          if (!voteErr && Array.isArray(votedIds)) {
+            votedIds.forEach(id => userVotedFeedbackIds.add(id));
+          }
+        } catch (voteErr) {
+          console.warn('Could not load voted feedback IDs:', voteErr);
+        }
+      }
+      // Also load feedback IDs the user authored (for edit/delete buttons)
+      userAuthoredFeedbackIds = new Set();
+      if (user) {
+        try {
+          const { data: authoredIds, error: authErr } = await sb.rpc('get_my_feedback_ids');
+          if (!authErr && Array.isArray(authoredIds)) {
+            authoredIds.forEach(id => userAuthoredFeedbackIds.add(id));
+          }
+        } catch (authErr) {
+          console.warn('Could not load authored feedback IDs:', authErr);
+        }
+      }
+
       updateFeedbackCategoryCounts(feedbackData);
       renderFeedbackList();
       renderTrendingFeedback(feedbackData);
@@ -1606,8 +1923,6 @@ const { data, error } = await sb
 
     if (emptyState) emptyState.hidden = filtered.length > 0;
 
-    const upvotedIds = getUpvotedFeedbackIds();
-
     filtered.forEach(post => {
       const clone = template.content.cloneNode(true);
       const article = clone.querySelector('article');
@@ -1626,7 +1941,7 @@ const { data, error } = await sb
       const voteCount = clone.querySelector('[data-field="upvotes_count"]');
       if (voteCount) voteCount.textContent = post.upvotes_count || 0;
 
-      const isUpvoted = upvotedIds.includes(post.id);
+      const isUpvoted = userVotedFeedbackIds.has(post.id);
       voteBtn.setAttribute('aria-pressed', String(isUpvoted));
 
       if (isLocked) {
@@ -1691,6 +2006,29 @@ const { data, error } = await sb
         });
       }
 
+      const user = getCurrentUser();
+      const isAdmin = window.PubAuth && typeof window.PubAuth.isAdmin === 'function' ? window.PubAuth.isAdmin() : false;
+      const isAuthor = userAuthoredFeedbackIds.has(post.id);
+
+      if (user && (isAuthor || isAdmin)) {
+        const actionsBar = document.createElement('div');
+        actionsBar.className = 'owner-actions';
+        actionsBar.innerHTML = `
+          <span class="owner-actions__label">${isAuthor ? 'Your post (anonymous)' : 'Admin'}</span>
+          ${isAuthor && !isLocked ? `<button type="button" class="btn btn--ghost btn--xs btn-edit-feedback" data-id="${post.id}">Edit</button>` : ''}
+          <button type="button" class="btn btn--ghost btn--xs btn--danger btn-delete-feedback" data-id="${post.id}">Delete</button>
+        `;
+        const editBtn = actionsBar.querySelector('.btn-edit-feedback');
+        if (editBtn) {
+          editBtn.addEventListener('click', () => openEditFeedbackDialog(post));
+        }
+        const delBtn = actionsBar.querySelector('.btn-delete-feedback');
+        if (delBtn) {
+          delBtn.addEventListener('click', () => handleDeleteFeedback(post.id));
+        }
+        article.appendChild(actionsBar);
+      }
+
       feed.appendChild(clone);
     });
   }
@@ -1727,14 +2065,11 @@ const { data, error } = await sb
       return;
     }
 
-    const upvotedIds = getUpvotedFeedbackIds();
-    if (upvotedIds.includes(feedbackId)) {
-      showToast('You have already upvoted this post.', 'info');
-      return;
-    }
+    if (btn.disabled) return;
+    btn.disabled = true;
 
     try {
-      const { data, error } = await sb.rpc('increment_feedback_upvote', {
+      const { data, error } = await sb.rpc('toggle_feedback_upvote', {
         p_feedback_id: feedbackId
       });
 
@@ -1742,20 +2077,28 @@ const { data, error } = await sb
 
       if (data && data.success) {
         countEl.textContent = data.upvotes_count;
-        btn.setAttribute('aria-pressed', 'true');
-        addUpvotedFeedbackId(feedbackId);
+        const isActive = Boolean(data.active);
+        btn.setAttribute('aria-pressed', String(isActive));
+        if (isActive) {
+          userVotedFeedbackIds.add(feedbackId);
+          showToast('Upvoted anonymously. 👍', 'success');
+        } else {
+          userVotedFeedbackIds.delete(feedbackId);
+          showToast('Upvote removed.', 'info');
+        }
         const item = feedbackData.find(f => f.id === feedbackId);
         if (item) {
           item.upvotes_count = data.upvotes_count;
           renderTrendingFeedback(feedbackData);
         }
-        showToast('Upvoted anonymously. 👍', 'success');
       } else {
         showToast(data?.error || 'Could not register upvote.', 'error');
       }
     } catch (err) {
       console.error('Upvote error:', err);
       showToast(err.message || 'Upvote failed.', 'error');
+    } finally {
+      btn.disabled = false;
     }
   }
 
@@ -1815,28 +2158,38 @@ const { data, error } = await sb
     }
 
     try {
-      const { data, error } = await sb
-        .from('campus_feedback')
-        .insert({
+      const { data, error } = await sb.rpc('submit_feedback', {
+        p_anonymous_handle: handle,
+        p_category: category,
+        p_content: content
+      });
+
+      if (error) throw error;
+
+      if (data && data.success) {
+        userAuthoredFeedbackIds.add(data.id);
+        const newPost = {
+          id: data.id,
           anonymous_handle: handle,
           category,
           content,
           upvotes_count: 0,
           is_locked: false,
-          admin_keep: false
-        })
-        .select()
-        .single();
+          admin_keep: false,
+          created_at: new Date().toISOString()
+        };
 
-      if (error) throw error;
+        feedbackData.unshift(newPost);
+        renderFeedbackList();
+        renderTrendingFeedback(feedbackData);
+        form.reset();
 
-      feedbackData.unshift(data);
-      renderFeedbackList();
-      form.reset();
-
-      const dialog = document.getElementById('feedback-dialog');
-      if (dialog) dialog.close();
-      showToast('Anonymous feedback submitted! 🛡️', 'success');
+        const dialog = document.getElementById('feedback-dialog');
+        if (dialog) dialog.close();
+        showToast('Anonymous feedback submitted! 🛡️', 'success');
+      } else {
+        throw new Error(data?.error || 'Could not post feedback.');
+      }
     } catch (err) {
       console.error('Feedback submit error:', err);
       if (msgEl) {
@@ -1851,6 +2204,122 @@ const { data, error } = await sb
     }
   }
 
+  function openEditFeedbackDialog(post) {
+    const dialog = document.getElementById('edit-feedback-dialog');
+    const idInput = document.getElementById('edit-feedback-id');
+    const contentInput = document.getElementById('edit-feedback-content');
+    const countEl = document.getElementById('edit-feedback-content-count');
+    const msgEl = document.getElementById('edit-feedback-message');
+    if (!dialog || !idInput || !contentInput) return;
+
+    idInput.value = post.id;
+    contentInput.value = post.content || '';
+    if (countEl) countEl.textContent = `${contentInput.value.length} / 1000`;
+    if (msgEl) {
+      msgEl.textContent = '';
+      msgEl.style.display = 'none';
+    }
+    dialog.showModal();
+  }
+
+  async function handleEditFeedbackSubmit(e) {
+    if (e.submitter && e.submitter.getAttribute('formmethod') === 'dialog') return;
+    e.preventDefault();
+
+    const sb = getSupabase();
+    const form = e.target;
+    const id = document.getElementById('edit-feedback-id')?.value;
+    const content = document.getElementById('edit-feedback-content')?.value.trim();
+    const msgEl = document.getElementById('edit-feedback-message');
+    const submitBtn = form.querySelector('button.btn--accent');
+
+    if (!getCurrentUser()) {
+      if (msgEl) {
+        msgEl.textContent = 'You must be signed in to edit feedback.';
+        msgEl.style.display = 'block';
+      }
+      return;
+    }
+
+    if (!content || content.length < 20) {
+      if (msgEl) {
+        msgEl.textContent = 'Feedback must be at least 20 characters long.';
+        msgEl.style.display = 'block';
+      }
+      return;
+    }
+
+    if (!validateFeedbackInput(content)) return;
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving…';
+    }
+
+    try {
+      const { data, error } = await sb.rpc('edit_my_feedback', {
+        p_feedback_id: id,
+        p_content: content
+      });
+
+      if (error) throw error;
+
+      if (data && data.success) {
+        const item = feedbackData.find(f => f.id === id);
+        if (item) {
+          item.content = content;
+        }
+        renderFeedbackList();
+        renderTrendingFeedback(feedbackData);
+        form.reset();
+        const dialog = document.getElementById('edit-feedback-dialog');
+        if (dialog) dialog.close();
+        showToast('Feedback updated! 🛡️', 'success');
+      } else {
+        throw new Error(data?.error || 'Could not update feedback.');
+      }
+    } catch (err) {
+      console.error('Edit feedback error:', err);
+      if (msgEl) {
+        msgEl.textContent = err.message || 'Could not edit feedback.';
+        msgEl.style.display = 'block';
+      }
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save changes';
+      }
+    }
+  }
+
+  async function handleDeleteFeedback(feedbackId) {
+    if (!confirm('Are you sure you want to delete this feedback post? This cannot be undone.')) return;
+    const sb = getSupabase();
+    if (!sb) return;
+
+    try {
+      const { data, error } = await sb.rpc('delete_my_feedback', {
+        p_feedback_id: feedbackId
+      });
+
+      if (error) throw error;
+
+      if (data && data.success) {
+        feedbackData = feedbackData.filter(f => f.id !== feedbackId);
+        userAuthoredFeedbackIds.delete(feedbackId);
+        userVotedFeedbackIds.delete(feedbackId);
+        renderFeedbackList();
+        renderTrendingFeedback(feedbackData);
+        showToast('Feedback post deleted.', 'info');
+      } else {
+        showToast(data?.error || 'Could not delete feedback.', 'error');
+      }
+    } catch (err) {
+      console.error('Delete feedback error:', err);
+      showToast(err.message || 'Could not delete feedback.', 'error');
+    }
+  }
+
   // =========================================================================
   // 5. HALL OF FAME (hall-of-fame.html / data-page="hall-of-fame")
   // =========================================================================
@@ -1858,10 +2327,12 @@ const { data, error } = await sb
   let hofData = [];
   let currentHofCategory = 'all';
   let userReactionsSet = new Set();
+  let editingHofId = null;
 
   async function initHallOfFamePage() {
     const form = document.getElementById('publish-form');
     const filterGroup = document.getElementById('hof-filter');
+    const publishDialog = document.getElementById('publish-dialog');
 
     if (filterGroup) {
       filterGroup.addEventListener('click', e => {
@@ -1876,6 +2347,19 @@ const { data, error } = await sb
     }
 
     if (form) form.addEventListener('submit', handlePublishBroadcastSubmit);
+
+    if (publishDialog) {
+      publishDialog.addEventListener('close', () => {
+        editingHofId = null;
+        const titleEl = document.getElementById('publish-dialog-title');
+        if (titleEl) titleEl.textContent = 'Publish official announcement';
+        if (form) {
+          form.reset();
+          const submitBtn = form.querySelector('button.btn--accent');
+          if (submitBtn) submitBtn.textContent = 'Publish broadcast';
+        }
+      });
+    }
   }
 
   async function handleHofReaction(hofId, reactionType, button) {
@@ -1887,6 +2371,9 @@ const { data, error } = await sb
       return;
     }
 
+    if (button.disabled) return;
+    button.disabled = true;
+
     try {
       const { data, error } = await sb.rpc('increment_hof_reaction', {
         p_hof_id: hofId,
@@ -1896,9 +2383,15 @@ const { data, error } = await sb
       if (error) throw error;
 
       if (data && data.success) {
-        const countEl = button.querySelector('.cheer__count');
-        if (countEl && data.reaction_counts) {
-          countEl.textContent = data.reaction_counts[reactionType] || 0;
+        // Recompute all 3 reaction counts from the returned reaction_counts
+        const article = button.closest('article');
+        if (article && data.reaction_counts) {
+          ['applaud', 'celebrate', 'inspiring'].forEach(rt => {
+            const btn = article.querySelector(`[data-reaction="${rt}"]`);
+            if (btn) {
+              btn.querySelector('.cheer__count').textContent = data.reaction_counts[rt] || 0;
+            }
+          });
         }
         const isActive = Boolean(data.active);
         button.setAttribute('aria-pressed', String(isActive));
@@ -1910,17 +2403,16 @@ const { data, error } = await sb
           userReactionsSet.delete(key);
           showToast('Reaction removed.', 'info');
         }
-
         const item = hofData.find(h => h.id === hofId);
-        if (item) {
-          item.reaction_counts = data.reaction_counts;
-        }
+        if (item) item.reaction_counts = data.reaction_counts;
       } else {
         showToast(data?.error || 'Could not record reaction.', 'error');
       }
     } catch (err) {
       console.error('Reaction error:', err);
       showToast(err.message || 'Could not record reaction.', 'error');
+    } finally {
+      button.disabled = false;
     }
   }
 
@@ -2139,8 +2631,82 @@ const { data, error } = await sb
         btn.addEventListener('click', () => handleHofReaction(item.id, reactionType, btn));
       });
 
+      const user = getCurrentUser();
+      const isAdmin = window.PubAuth && typeof window.PubAuth.isAdmin === 'function' ? window.PubAuth.isAdmin() : false;
+      const isPublisher = user && item.publisher_id === user.id;
+
+      if (user && (isPublisher || isAdmin)) {
+        const actionsBar = document.createElement('div');
+        actionsBar.className = 'owner-actions';
+        actionsBar.innerHTML = `
+          <span class="owner-actions__label">${isPublisher ? 'Your broadcast' : 'Admin'}</span>
+          ${isPublisher || isAdmin ? `<button type="button" class="btn btn--ghost btn--xs btn-edit-hof" data-id="${item.id}">Edit</button>` : ''}
+          <button type="button" class="btn btn--ghost btn--xs btn--danger btn-delete-hof" data-id="${item.id}">Delete</button>
+        `;
+        const editBtn = actionsBar.querySelector('.btn-edit-hof');
+        if (editBtn) {
+          editBtn.addEventListener('click', () => openEditHofDialog(item));
+        }
+        const delBtn = actionsBar.querySelector('.btn-delete-hof');
+        if (delBtn) {
+          delBtn.addEventListener('click', () => handleDeleteHof(item.id));
+        }
+        article.appendChild(actionsBar);
+      }
+
       feed.appendChild(clone);
     });
+  }
+
+  function openEditHofDialog(item) {
+    const dialog = document.getElementById('publish-dialog');
+    const form = document.getElementById('publish-form');
+    if (!dialog || !form) return;
+
+    editingHofId = item.id;
+    const titleEl = document.getElementById('publish-dialog-title');
+    if (titleEl) titleEl.textContent = 'Edit official announcement';
+
+    const titleInput = form.querySelector('#publish-title');
+    if (titleInput) titleInput.value = item.title || '';
+
+    const detailsInput = form.querySelector('#publish-details');
+    if (detailsInput) detailsInput.value = item.description || '';
+
+    const proofInput = form.querySelector('#publish-proof');
+    if (proofInput) proofInput.value = item.proof_link || '';
+
+    const catRadio = form.querySelector(`input[name="category"][value="${item.category}"]`);
+    if (catRadio) catRadio.checked = true;
+
+    const featCheckbox = form.querySelector('input[name="featured"]');
+    if (featCheckbox) featCheckbox.checked = Boolean(item.is_featured);
+
+    const submitBtn = form.querySelector('button.btn--accent');
+    if (submitBtn) submitBtn.textContent = 'Save changes';
+
+    const msgEl = document.getElementById('publish-message');
+    if (msgEl) msgEl.textContent = '';
+
+    dialog.showModal();
+  }
+
+  async function handleDeleteHof(hofId) {
+    if (!confirm('Are you sure you want to delete this Hall of Fame announcement? This cannot be undone.')) return;
+    const sb = getSupabase();
+    if (!sb) return;
+
+    try {
+      const { error } = await sb.from('hall_of_fame').delete().eq('id', hofId);
+      if (error) throw error;
+
+      hofData = hofData.filter(h => h.id !== hofId);
+      renderHallOfFameList();
+      showToast('Announcement deleted.', 'info');
+    } catch (err) {
+      console.error('Delete broadcast error:', err);
+      showToast(err.message || 'Could not delete announcement.', 'error');
+    }
   }
 
   async function handlePublishBroadcastSubmit(e) {
@@ -2178,13 +2744,66 @@ const { data, error } = await sb
 
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Publishing…';
+      submitBtn.textContent = editingHofId ? 'Saving…' : 'Publishing…';
     }
 
     try {
       let imageUrl = null;
       if (imgFile) {
         imageUrl = await uploadImageToStorage(imgFile, 'broadcasts');
+      }
+
+      if (editingHofId) {
+        const updates = {
+          title,
+          description: details,
+          category,
+          proof_link,
+          is_featured: isFeatured
+        };
+        if (imageUrl) {
+          updates.image_url = imageUrl;
+        }
+
+        const { data, error } = await sb
+          .from('hall_of_fame')
+          .update(updates)
+          .eq('id', editingHofId)
+          .select(`
+            id,
+            publisher_id,
+            category,
+            title,
+            description,
+            proof_link,
+            image_url,
+            is_featured,
+            reaction_counts,
+            created_at,
+            publisher:profiles(id, full_name, department, role)
+          `)
+          .single();
+
+        if (error) throw error;
+
+        const idx = hofData.findIndex(h => h.id === editingHofId);
+        if (idx !== -1) {
+          hofData[idx] = {
+            ...hofData[idx],
+            ...data
+          };
+        }
+        if (data.is_featured) {
+          renderFeaturedBroadcast(data);
+        }
+        renderHallOfFameList();
+        form.reset();
+
+        const dialog = document.getElementById('publish-dialog');
+        if (dialog) dialog.close();
+        editingHofId = null;
+        showToast('Official announcement updated! 🏆', 'success');
+        return;
       }
 
       const { data, error } = await sb
@@ -2235,7 +2854,7 @@ const { data, error } = await sb
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Publish';
+        submitBtn.textContent = editingHofId ? 'Save changes' : 'Publish broadcast';
       }
     }
   }

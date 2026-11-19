@@ -348,6 +348,34 @@
     </form>
   </dialog>
 
+  <!-- Edit anonymous feedback (CAMPUS_FEEDBACK) -->
+  <dialog class="modal" id="edit-feedback-dialog" aria-labelledby="edit-feedback-dialog-title">
+    <form class="modal__inner" id="edit-feedback-form" novalidate>
+      <header class="modal__header">
+        <div>
+          <h2 id="edit-feedback-dialog-title">Edit feedback</h2>
+          <p>Only you can see this option. Editing preserves your anonymity.</p>
+        </div>
+        <button type="submit" class="icon-btn" formmethod="dialog" formnovalidate aria-label="Close">&times;</button>
+      </header>
+      <div class="modal__body">
+        <input type="hidden" id="edit-feedback-id" name="feedback_id">
+        <div class="field">
+          <label for="edit-feedback-content">Your feedback</label>
+          <textarea id="edit-feedback-content" name="content" rows="5" minlength="20" maxlength="1000"
+            placeholder="Describe the issue clearly…"
+            aria-describedby="edit-feedback-content-count edit-feedback-message" required></textarea>
+          <div class="field__foot"><output class="field__counter" id="edit-feedback-content-count" for="edit-feedback-content">0 / 1000</output></div>
+        </div>
+        <p class="form-message form-message--error" id="edit-feedback-message" role="alert"></p>
+      </div>
+      <footer class="modal__footer">
+        <button type="submit" class="btn btn--ghost" formmethod="dialog" formnovalidate>Cancel</button>
+        <button type="submit" class="btn btn--accent">Save changes</button>
+      </footer>
+    </form>
+  </dialog>
+
   <!-- Builder profile (PROFILES table) -->
   <dialog class="modal modal--wide" id="profile-dialog" aria-labelledby="profile-dialog-title">
     <form class="modal__inner" id="profile-form" novalidate>
