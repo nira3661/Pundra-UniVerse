@@ -215,7 +215,7 @@
     }
   }
 
-  async function loadAchievements(append = false) {
+async function loadAchievements(append = false) {
     const feed = document.getElementById('achievement-feed');
     const sb = getSupabase();
     if (!feed || !sb) return;
@@ -223,27 +223,37 @@
     feed.setAttribute('aria-busy', 'true');
 
     try {
-      const { data, error } = await sb
+      const { data: posts, error } = await sb
         .from('achievement_posts')
-        .select(`
-          id,
-          author_id,
-          title,
-          description,
-          milestone_tag,
-          proof_link,
-          thumbnail_url,
-          cheer_counts,
-          created_at,
-          author:profiles!author_id(id, full_name, department, batch_year)
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(30);
 
       if (error) throw error;
 
+      // Fetch author profiles separately so PostgREST FK join issues can never block the feed
+      const authorIds = [...new Set((posts || []).map(p => p.author_id).filter(Boolean))];
+      const authorsMap = new Map();
+      if (authorIds.length > 0) {
+        const { data: profilesData, error: profilesErr } = await sb
+          .from('profiles')
+          .select('id, full_name, department, batch_year')
+          .in('id', authorIds);
+
+        if (profilesErr) {
+          console.warn('PUB Hub: Could not load author profiles:', profilesErr.message);
+        } else {
+          (profilesData || []).forEach(p => authorsMap.set(p.id, p));
+        }
+      }
+
+      const data = (posts || []).map(post => ({
+        ...post,
+        author: authorsMap.get(post.author_id) || null
+      }));
+
       if (!append) {
-        achievementsData = data || [];
+        achievementsData = data;
         const user = getCurrentUser();
         userCheersSet = new Set();
         if (user) {
@@ -258,12 +268,13 @@
           }
         }
       } else {
-        achievementsData = (achievementsData || []).concat(data || []);
+        achievementsData = (achievementsData || []).concat(data);
       }
 
       renderAchievements();
     } catch (err) {
-      console.warn('PUB Hub: Loading fallback sample achievements:', err.message);
+      console.error('PUB Hub: Failed to load achievements:', err);
+      showToast(err.message || 'Could not load milestones.', 'error');
     } finally {
       feed.setAttribute('aria-busy', 'false');
     }
@@ -447,26 +458,26 @@
         cheer_counts: { shipped: 0, big_brain: 0, winner: 0 }
       };
 
-      const { data, error } = await sb
+const { data, error } = await sb
         .from('achievement_posts')
         .insert(newPost)
-        .select(`
-          id,
-          author_id,
-          title,
-          description,
-          milestone_tag,
-          proof_link,
-          thumbnail_url,
-          cheer_counts,
-          created_at,
-          author:profiles(id, full_name, department, batch_year)
-        `)
+        .select('*')
         .single();
 
       if (error) throw error;
 
-      achievementsData.unshift(data);
+      const currentProfile = getCurrentProfile();
+      achievementsData.unshift({
+        ...data,
+        author: currentProfile
+          ? {
+              id: currentProfile.id,
+              full_name: currentProfile.full_name,
+              department: currentProfile.department,
+              batch_year: currentProfile.batch_year
+            }
+          : null
+      });
       renderAchievements();
       form.reset();
 
