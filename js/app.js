@@ -767,6 +767,7 @@ async function loadAchievements(append = false) {
     }
 
     setupTaskCheckboxes();
+    setupWorkspaceTeamToggle();
   }
 
   async function loadPitches() {
@@ -1059,7 +1060,7 @@ async function loadAchievements(append = false) {
               status,
               thumbnail_url,
               created_at,
-              creator:profiles(id, full_name, department, batch_year)
+              creator:profiles!creator_id(id, full_name, department, batch_year)
             `)
             .single();
 
@@ -1081,7 +1082,7 @@ async function loadAchievements(append = false) {
                 status,
                 thumbnail_url,
                 created_at,
-                creator:profiles(id, full_name, department, batch_year)
+                creator:profiles!creator_id(id, full_name, department, batch_year)
               `)
               .single();
             if (error) throw error;
@@ -1134,7 +1135,7 @@ async function loadAchievements(append = false) {
             status,
             thumbnail_url,
             created_at,
-            creator:profiles(id, full_name, department, batch_year)
+            creator:profiles!creator_id(id, full_name, department, batch_year)
           `)
           .single();
 
@@ -1163,7 +1164,7 @@ async function loadAchievements(append = false) {
               status,
               thumbnail_url,
               created_at,
-              creator:profiles(id, full_name, department, batch_year)
+              creator:profiles!creator_id(id, full_name, department, batch_year)
             `)
             .single();
 
@@ -1346,8 +1347,18 @@ async function loadAchievements(append = false) {
         if (emptyEl) emptyEl.hidden = false;
         const msgList = document.getElementById('message-list');
         const taskList = document.getElementById('task-list');
+        const avatarStack = document.getElementById('workspace-avatar-stack') || document.querySelector('.workspace__head .avatar-stack');
+        const drawer = document.getElementById('workspace-team-drawer');
+        const subtitle = document.getElementById('workspace-team-subtitle');
+        const trigger = document.getElementById('workspace-title-trigger');
+        const rosterEl = document.getElementById('workspace-team-roster');
         if (msgList) msgList.innerHTML = '';
         if (taskList) taskList.innerHTML = '';
+        if (avatarStack) avatarStack.innerHTML = '';
+        if (drawer) drawer.hidden = true;
+        if (subtitle) { subtitle.hidden = true; subtitle.textContent = ''; }
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        if (rosterEl) rosterEl.innerHTML = '';
         updateTaskProgress();
         activeWorkspacePitchId = null;
         return;
@@ -1390,8 +1401,18 @@ async function loadAchievements(append = false) {
       if (!hasUnlocked) {
         const msgList = document.getElementById('message-list');
         const taskList = document.getElementById('task-list');
+        const avatarStack = document.getElementById('workspace-avatar-stack') || document.querySelector('.workspace__head .avatar-stack');
+        const drawer = document.getElementById('workspace-team-drawer');
+        const subtitle = document.getElementById('workspace-team-subtitle');
+        const trigger = document.getElementById('workspace-title-trigger');
+        const rosterEl = document.getElementById('workspace-team-roster');
         if (msgList) msgList.innerHTML = '';
         if (taskList) taskList.innerHTML = '';
+        if (avatarStack) avatarStack.innerHTML = '';
+        if (drawer) drawer.hidden = true;
+        if (subtitle) { subtitle.hidden = true; subtitle.textContent = ''; }
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        if (rosterEl) rosterEl.innerHTML = '';
         updateTaskProgress();
         activeWorkspacePitchId = null;
       }
@@ -1411,11 +1432,185 @@ async function loadAchievements(append = false) {
     }
   }
 
+  function formatInitials(name, fallback = 'TM') {
+    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if (parts.length > 1) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return fallback.slice(0, 2).toUpperCase();
+  }
+
+  async function loadWorkspaceTeamMembers(pitchId) {
+    const stackEl = document.getElementById('workspace-avatar-stack') || document.querySelector('.workspace__head .avatar-stack');
+    const sb = getSupabase();
+    if (!stackEl || !sb || !pitchId) return;
+
+    try {
+      let members = [];
+
+      // 1. Try secure RPC first
+      try {
+        const { data: rpcMembers, error: rpcErr } = await sb.rpc('get_pitch_team_members', { p_pitch_id: pitchId });
+        if (!rpcErr && Array.isArray(rpcMembers) && rpcMembers.length > 0) {
+          members = rpcMembers;
+        }
+      } catch (e) {
+        // Fall back to direct table queries
+      }
+
+      // 2. Fall back to direct queries if RPC is not yet created or returned empty
+      if (members.length === 0) {
+        const { data: pitch } = await sb
+          .from('project_pitches')
+          .select('id, creator_id, creator:profiles!creator_id(id, full_name, department, avatar_url)')
+          .eq('id', pitchId)
+          .maybeSingle();
+
+        if (pitch && pitch.creator) {
+          members.push({
+            user_id: pitch.creator_id,
+            full_name: pitch.creator.full_name || 'Project Lead',
+            department: pitch.creator.department,
+            avatar_url: pitch.creator.avatar_url,
+            role: 'Lead',
+            is_lead: true
+          });
+        }
+
+        const { data: acceptedApps } = await sb
+          .from('pitch_applications')
+          .select('id, applicant_id, role_applied, status, applicant:profiles!applicant_id(id, full_name, department, avatar_url)')
+          .eq('pitch_id', pitchId)
+          .eq('status', 'accepted')
+          .order('created_at', { ascending: true });
+
+        (acceptedApps || []).forEach(app => {
+          if (app.applicant) {
+            members.push({
+              user_id: app.applicant_id,
+              full_name: app.applicant.full_name || 'Teammate',
+              department: app.applicant.department,
+              avatar_url: app.applicant.avatar_url,
+              role: app.role_applied || 'Member',
+              is_lead: false
+            });
+          }
+        });
+      }
+
+      const subEl = document.getElementById('workspace-team-subtitle');
+      const rosterEl = document.getElementById('workspace-team-roster');
+      const countEl = document.getElementById('workspace-team-count');
+
+      stackEl.innerHTML = '';
+      if (rosterEl) rosterEl.innerHTML = '';
+
+      if (members.length === 0) {
+        stackEl.setAttribute('aria-label', 'No team members');
+        if (subEl) subEl.textContent = 'No team members yet.';
+        if (countEl) countEl.textContent = '0 members';
+        return;
+      }
+
+      const colorVariants = ['', 'avatar--accent', 'avatar--gold', 'avatar--info'];
+      const namesList = members.map(m => m.full_name).join(', ');
+      stackEl.setAttribute('aria-label', `Team members: ${namesList}`);
+
+      if (subEl) {
+        subEl.textContent = members
+          .map(m => `${m.full_name} (${m.role || (m.is_lead ? 'Lead' : 'Member')})`)
+          .join(' · ');
+      }
+
+      if (countEl) {
+        countEl.textContent = `${members.length} member${members.length === 1 ? '' : 's'}`;
+      }
+
+      members.forEach((member, idx) => {
+        const colorClass = colorVariants[idx % colorVariants.length];
+        const roleText = member.role || (member.is_lead ? 'Lead' : 'Member');
+        const deptText = member.department ? ` · ${member.department}` : '';
+
+        // 1. Render in top avatar stack
+        const liStack = document.createElement('li');
+        liStack.className = `avatar ${colorClass}`.trim();
+        liStack.title = `${member.full_name} (${roleText}${deptText})`;
+
+        if (member.avatar_url) {
+          const img = document.createElement('img');
+          img.src = member.avatar_url;
+          img.alt = member.full_name;
+          img.loading = 'lazy';
+          liStack.appendChild(img);
+        } else {
+          liStack.textContent = formatInitials(member.full_name, member.is_lead ? 'PL' : 'TM');
+        }
+        stackEl.appendChild(liStack);
+
+        // 2. Render in expandable team roster drawer with role as subtitle
+        if (rosterEl) {
+          const liRoster = document.createElement('li');
+          liRoster.className = 'workspace__team-item';
+
+          const avatarHtml = member.avatar_url
+            ? `<span class="avatar avatar--sm ${colorClass}"><img src="${escapeHtml(member.avatar_url)}" alt="${escapeHtml(member.full_name)}"></span>`
+            : `<span class="avatar avatar--sm ${colorClass}">${escapeHtml(formatInitials(member.full_name, member.is_lead ? 'PL' : 'TM'))}</span>`;
+
+          liRoster.innerHTML = `
+            ${avatarHtml}
+            <div class="workspace__team-item-info">
+              <strong class="workspace__team-item-name">${escapeHtml(member.full_name)}</strong>
+              <span class="workspace__team-item-role">${escapeHtml(roleText)}${escapeHtml(deptText)}</span>
+            </div>
+          `;
+          rosterEl.appendChild(liRoster);
+        }
+      });
+    } catch (err) {
+      console.warn('Load workspace team members error:', err);
+    }
+  }
+
+  function setupWorkspaceTeamToggle() {
+    const trigger = document.getElementById('workspace-title-trigger');
+    const avatarStack = document.getElementById('workspace-avatar-stack');
+    const drawer = document.getElementById('workspace-team-drawer');
+    const subtitle = document.getElementById('workspace-team-subtitle');
+    if (!trigger || !drawer) return;
+
+    function toggleTeamView() {
+      const isExpanded = trigger.getAttribute('aria-expanded') === 'true';
+      const nextState = !isExpanded;
+      trigger.setAttribute('aria-expanded', String(nextState));
+      drawer.hidden = !nextState;
+      if (subtitle) subtitle.hidden = !nextState;
+    }
+
+    trigger.addEventListener('click', toggleTeamView);
+    trigger.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleTeamView();
+      }
+    });
+
+    if (avatarStack) {
+      avatarStack.style.cursor = 'pointer';
+      avatarStack.addEventListener('click', toggleTeamView);
+      avatarStack.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleTeamView();
+        }
+      });
+    }
+  }
+
   async function selectWorkspace(pitchId, title) {
     activeWorkspacePitchId = pitchId;
     const threadTitle = document.getElementById('thread-title');
     if (threadTitle) threadTitle.textContent = title;
 
+    await loadWorkspaceTeamMembers(pitchId);
     await loadWorkspaceMessages(pitchId);
     subscribeToWorkspaceMessages(pitchId);
     await loadWorkspaceTasks(pitchId);
@@ -1515,6 +1710,19 @@ async function loadAchievements(append = false) {
 
           const messageWithSender = { ...payload.new, sender: senderProfile };
           appendMessageToThread(messageWithSender, user?.id);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'pitch_applications',
+          filter: `pitch_id=eq.${pitchId}`
+        },
+        () => {
+          loadWorkspaceTeamMembers(pitchId);
+          loadLeadApplications(pitchId);
         }
       )
       .subscribe();
@@ -1624,6 +1832,9 @@ async function loadAchievements(append = false) {
 
       showToast(`Applicant ${newStatus === 'accepted' ? 'accepted into team' : 'declined'}.`, 'success');
       itemEl.remove();
+      if (newStatus === 'accepted' && activeWorkspacePitchId) {
+        await loadWorkspaceTeamMembers(activeWorkspacePitchId);
+      }
     } catch (err) {
       console.error('App update error:', err);
       showToast('Could not update application.', 'error');
@@ -2479,78 +2690,8 @@ async function loadAchievements(append = false) {
     }
   }
 
-  function renderFeaturedBroadcast(item) {
-    const featuredCard = document.querySelector('.broadcast-featured');
-    if (!featuredCard || !item) return;
-
-    featuredCard.dataset.id = item.id;
-    featuredCard.dataset.category = item.category;
-
-    const tagEl = featuredCard.querySelector('.tag');
-    if (tagEl) {
-      tagEl.className = `tag tag--${item.category}`;
-      tagEl.textContent = item.category.charAt(0).toUpperCase() + item.category.slice(1);
-    }
-
-    const timeEl = featuredCard.querySelector('time');
-    if (timeEl) {
-      timeEl.setAttribute('datetime', item.created_at);
-      timeEl.textContent = formatRelativeTime(item.created_at);
-    }
-
-    const titleEl = featuredCard.querySelector('h3');
-    if (titleEl) titleEl.textContent = item.title;
-
-    const descEl = featuredCard.querySelector('p:not(.publisher)');
-    if (descEl) descEl.textContent = item.description;
-
-    const proofEl = featuredCard.querySelector('.link-pill');
-    if (proofEl) {
-      if (item.proof_link) {
-        proofEl.href = item.proof_link;
-        proofEl.hidden = false;
-      } else {
-        proofEl.hidden = true;
-      }
-    }
-
-    const sealEl = featuredCard.querySelector('.publisher__seal');
-    if (sealEl) sealEl.textContent = (item.publisher?.department || 'PUB').slice(0, 3).toUpperCase();
-
-    const unitEl = featuredCard.querySelector('.publisher__unit');
-    if (unitEl) unitEl.textContent = item.publisher?.department || 'Institutional Announcement';
-
-    const roleEl = featuredCard.querySelector('.publisher__role');
-    if (roleEl && item.publisher?.role) roleEl.textContent = item.publisher.role;
-
-    if (item.image_url) {
-      let img = featuredCard.querySelector('img.broadcast-featured__thumb');
-      if (!img) {
-        img = document.createElement('img');
-        img.className = 'broadcast-featured__thumb card__thumb';
-        img.style.maxHeight = '240px';
-        img.style.width = '100%';
-        img.style.objectFit = 'cover';
-        img.style.borderRadius = 'var(--radius-md)';
-        img.style.marginBottom = 'var(--space-md)';
-        const bodyEl = featuredCard.querySelector('.broadcast-featured__body');
-        if (bodyEl) bodyEl.insertBefore(img, bodyEl.firstChild);
-      }
-      img.src = item.image_url;
-      img.alt = item.title;
-      img.hidden = false;
-    }
-
-    featuredCard.querySelectorAll('button.cheer[data-reaction]').forEach(btn => {
-      const reactionType = btn.dataset.reaction;
-      const countEl = btn.querySelector('.cheer__count');
-      if (countEl && item.reaction_counts) {
-        countEl.textContent = item.reaction_counts[reactionType] || 0;
-      }
-      const isPressed = userReactionsSet.has(`${item.id}:${reactionType}`);
-      btn.setAttribute('aria-pressed', String(isPressed));
-      btn.onclick = () => handleHofReaction(item.id, reactionType, btn);
-    });
+  function renderFeaturedBroadcast() {
+    // Featured announcement at top of Hall of Fame is removed; all announcements display in card grid.
   }
 
   async function loadHallOfFame() {
@@ -2595,19 +2736,6 @@ async function loadAchievements(append = false) {
       if (error) throw error;
 
       hofData = data || [];
-      const featuredCard = document.querySelector('.broadcast-featured');
-      const featuredSection = featuredCard?.closest('section');
-      const featuredItem = hofData.find(i => i.is_featured) || hofData[0];
-
-      if (featuredItem) {
-        if (featuredSection) featuredSection.hidden = false;
-        if (featuredCard) featuredCard.hidden = false;
-        renderFeaturedBroadcast(featuredItem);
-      } else {
-        if (featuredSection) featuredSection.hidden = true;
-        if (featuredCard) featuredCard.hidden = true;
-      }
-
       renderHallOfFameList();
     } catch (err) {
       console.warn('PUB Hub: Using sample Hall of Fame broadcasts:', err.message);
@@ -2633,11 +2761,13 @@ async function loadAchievements(append = false) {
 
     filtered.forEach(item => {
       const clone = template.content.cloneNode(true);
-      const article = clone.querySelector('article');
+      const article = clone.querySelector('article') || clone.firstElementChild;
       const date = new Date(item.created_at);
 
-      article.dataset.id = item.id;
-      article.dataset.category = item.category;
+      if (article) {
+        article.dataset.id = item.id;
+        article.dataset.category = item.category;
+      }
 
       const img = clone.querySelector('img.card__thumb');
       if (img && item.image_url) {
@@ -2678,9 +2808,19 @@ async function loadAchievements(append = false) {
         }
       }
 
+      const roleEl = clone.querySelector('[data-field="publisher_role"]');
+      if (roleEl) {
+        roleEl.textContent = item.publisher?.full_name || 'PUB Official';
+      }
+
       const unitEl = clone.querySelector('[data-field="publisher_unit"]');
       if (unitEl) {
-        unitEl.textContent = `${item.publisher?.department || 'Official Announcement'}`;
+        unitEl.textContent = item.publisher?.department || item.publisher?.role || 'Campus Administration';
+      }
+
+      const sealEl = clone.querySelector('[data-field="seal"]');
+      if (sealEl && !sealEl.textContent.trim()) {
+        sealEl.textContent = '🏆';
       }
 
       clone.querySelectorAll('button.cheer[data-reaction]').forEach(btn => {
@@ -2698,7 +2838,7 @@ async function loadAchievements(append = false) {
       const isAdmin = window.PubAuth && typeof window.PubAuth.isAdmin === 'function' ? window.PubAuth.isAdmin() : false;
       const isPublisher = user && item.publisher_id === user.id;
 
-      if (user && (isPublisher || isAdmin)) {
+      if (user && (isPublisher || isAdmin) && article) {
         const actionsBar = document.createElement('div');
         actionsBar.className = 'owner-actions';
         actionsBar.innerHTML = `
@@ -2843,7 +2983,7 @@ async function loadAchievements(append = false) {
             is_featured,
             reaction_counts,
             created_at,
-            publisher:profiles(id, full_name, department, role)
+            publisher:profiles!publisher_id(id, full_name, department, role)
           `)
           .single();
 
@@ -2855,9 +2995,6 @@ async function loadAchievements(append = false) {
             ...hofData[idx],
             ...data
           };
-        }
-        if (data.is_featured) {
-          renderFeaturedBroadcast(data);
         }
         renderHallOfFameList();
         form.reset();
@@ -2892,16 +3029,13 @@ async function loadAchievements(append = false) {
           is_featured,
           reaction_counts,
           created_at,
-          publisher:profiles(id, full_name, department, role)
+          publisher:profiles!publisher_id(id, full_name, department, role)
         `)
         .single();
 
       if (error) throw error;
 
       hofData.unshift(data);
-      if (data.is_featured) {
-        renderFeaturedBroadcast(data);
-      }
       renderHallOfFameList();
       form.reset();
 

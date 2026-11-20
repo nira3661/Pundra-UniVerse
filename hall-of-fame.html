@@ -66,7 +66,7 @@
         <aside class="auth-showcase" aria-hidden="true">
           <!-- REPLACE PHOTO: Swap with a real convocation or award ceremony photo -->
           <img class="auth-showcase__photo"
-            src="https://images.unsplash.com/photo-1627556704290-2b1f5853ff78?auto=format&amp;fit=crop&amp;w=1000&amp;q=80"
+            src="https://cdn.imgpile.com/f/CTruBn5_xl.webp"
             alt="">
           <div class="auth-showcase__top">
             <span class="auth-showcase__stamp">Hall of Fame &middot; Official Record</span>
@@ -176,8 +176,8 @@
           <div class="polaroid__frame">
             <!-- REPLACE PHOTO: Swap with a real photo of PUB students celebrating a win or convocation -->
             <img
-              src="https://images.unsplash.com/photo-1750566523677-244921008882?auto=format&amp;fit=crop&amp;w=900&amp;q=80"
-              alt="Graduates celebrating together in a university hallway" loading="eager">
+              src="https://cdn.imgpile.com/f/CTruBn5_xl.webp"
+              alt="Winners of robotics competition" loading="eager">
             <span class="polaroid__stamp">PUB Pride</span>
           </div>
           <figcaption class="polaroid__caption">
@@ -188,40 +188,6 @@
       </section>
 
       <div class="container">
-        <section aria-labelledby="featured-title">
-          <h2 class="visually-hidden" id="featured-title">Featured announcement</h2>
-          <article class="card broadcast-featured" data-id="" data-category="">
-            <div class="broadcast-featured__art" aria-hidden="true">
-              <!-- REPLACE PHOTO: Optional archival background photo for the featured Hall of Fame card -->
-              <img class="broadcast-featured__photo"
-                src="https://images.unsplash.com/photo-1627556704290-2b1f5853ff78?auto=format&amp;fit=crop&amp;w=900&amp;q=80"
-                alt="" loading="lazy">
-              <span class="broadcast-featured__rank"></span>
-              <span class="broadcast-featured__caption"></span>
-            </div>
-            <div class="broadcast-featured__body">
-              <div class="broadcast-featured__row">
-                <span class="tag"></span>
-                <time class="card__meta" datetime=""></time>
-              </div>
-              <h3></h3>
-              <p></p>
-              <div class="cheer-bar" role="group" aria-label="Reactions">
-                    <button type="button" class="cheer" data-reaction="applaud" aria-pressed="false"><span aria-hidden="true">&#128079;</span> Applaud <span class="cheer__count">0</span></button>
-                    <button type="button" class="cheer" data-reaction="celebrate" aria-pressed="false"><span aria-hidden="true">&#127881;</span> Celebrate <span class="cheer__count">0</span></button>
-                    <button type="button" class="cheer" data-reaction="inspiring" aria-pressed="false"><span aria-hidden="true">&#11088;</span> Inspiring <span class="cheer__count">0</span></button>
-              </div>
-              <div class="broadcast-featured__foot">
-                <p class="publisher">
-                  <span class="publisher__seal" aria-hidden="true"></span>
-                  <span><span class="publisher__role"></span><span class="publisher__unit"></span></span>
-                </p>
-                <a class="link-pill" href="#" target="_blank" rel="noopener noreferrer" hidden></a>
-              </div>
-            </div>
-          </article>
-        </section>
-
         <section class="section" aria-labelledby="broadcasts-title">
           <div class="feed__toolbar">
             <h2 class="section-title" id="broadcasts-title">All announcements</h2>
@@ -234,9 +200,9 @@
             </div>
           </div>
 
-          <!-- HALL_OF_FAME feed. Sample posts below are replaced by js/app.js. -->
-          <ol class="broadcast-list" id="hof-feed" aria-live="polite" aria-busy="false">
-          </ol>
+          <!-- HALL_OF_FAME feed. Dynamic card grid rendered by js/app.js. -->
+          <div class="card-grid" id="hof-feed" aria-live="polite" aria-busy="false">
+          </div>
 
           <div class="empty-state" id="hof-empty" hidden>
             <h3>No announcements in this category yet</h3>
@@ -272,30 +238,27 @@
 
   <!-- Announcement template for js/app.js -->
   <template id="broadcast-template">
-    <li class="broadcast">
-      <p class="broadcast__date" aria-hidden="true"><span class="broadcast__day"></span><span class="broadcast__month"></span></p>
-      <article class="card broadcast-card" data-id="" data-category="">
-        <img class="card__thumb" alt="" loading="lazy" hidden>
-        <header class="card__header">
-          <span class="tag" data-field="category"></span>
-          <time class="card__meta" datetime="" data-field="created_at"></time>
-        </header>
-        <h3 data-field="title"></h3>
-        <p class="card__body" data-field="details"></p>
-        <footer class="broadcast-card__foot">
-          <p class="publisher">
-            <span class="publisher__seal" aria-hidden="true" data-field="seal"></span>
-            <span><span class="publisher__role" data-field="publisher_role"></span><span class="publisher__unit" data-field="publisher_unit"></span></span>
-          </p>
-          <a class="link-pill" href="#" target="_blank" rel="noopener noreferrer" data-field="proof_link">Proof</a>
-        </footer>
-        <div class="cheer-bar" role="group" aria-label="Reactions">
-          <button type="button" class="cheer" data-reaction="applaud" aria-pressed="false"><span aria-hidden="true">&#128079;</span> Applaud <span class="cheer__count">0</span></button>
-          <button type="button" class="cheer" data-reaction="celebrate" aria-pressed="false"><span aria-hidden="true">&#127881;</span> Celebrate <span class="cheer__count">0</span></button>
-          <button type="button" class="cheer" data-reaction="inspiring" aria-pressed="false"><span aria-hidden="true">&#11088;</span> Inspiring <span class="cheer__count">0</span></button>
-        </div>
-      </article>
-    </li>
+    <article class="card broadcast-card" data-id="" data-category="">
+      <img class="card__thumb" alt="" loading="lazy" hidden>
+      <header class="card__header">
+        <span class="tag" data-field="category"></span>
+        <time class="card__meta" datetime="" data-field="created_at"></time>
+      </header>
+      <h3 class="card__title" data-field="title"></h3>
+      <p class="card__body" data-field="details"></p>
+      <footer class="broadcast-card__foot">
+        <p class="publisher">
+          <span class="publisher__seal" aria-hidden="true" data-field="seal">&#127942;</span>
+          <span><span class="publisher__role" data-field="publisher_role">Official</span><span class="publisher__unit" data-field="publisher_unit"></span></span>
+        </p>
+        <a class="link-pill" href="#" target="_blank" rel="noopener noreferrer" data-field="proof_link">Proof</a>
+      </footer>
+      <div class="cheer-bar" role="group" aria-label="Reactions">
+        <button type="button" class="cheer" data-reaction="applaud" aria-pressed="false"><span aria-hidden="true">&#128079;</span> Applaud <span class="cheer__count">0</span></button>
+        <button type="button" class="cheer" data-reaction="celebrate" aria-pressed="false"><span aria-hidden="true">&#127881;</span> Celebrate <span class="cheer__count">0</span></button>
+        <button type="button" class="cheer" data-reaction="inspiring" aria-pressed="false"><span aria-hidden="true">&#11088;</span> Inspiring <span class="cheer__count">0</span></button>
+      </div>
+    </article>
   </template>
 
   <!-- Publish announcement (HALL_OF_FAME) — Authorized Publishers only -->
@@ -341,7 +304,7 @@
           <label for="publish-image">Image <span class="optional">(optional)</span></label>
           <input type="file" id="publish-image" name="image" accept="image/png, image/jpeg, image/webp">
         </div>
-        <label class="toggle"><input type="checkbox" name="featured"> Feature at the top of the Hall of Fame</label>
+        <input type="hidden" name="featured" value="false">
         <p class="form-message" id="publish-message" role="status" aria-live="polite"></p>
       </div>
       <footer class="modal__footer">

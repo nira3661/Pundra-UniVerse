@@ -73,7 +73,7 @@
         <aside class="auth-showcase" aria-hidden="true">
           <!-- REPLACE PHOTO: Swap with a photo of PUB students working in teams -->
           <img class="auth-showcase__photo"
-            src="https://images.unsplash.com/photo-1758270705290-62b6294dd044?auto=format&amp;fit=crop&amp;w=1000&amp;q=80"
+            src="https://cdn.imgpile.com/f/gXB54j1_xl.webp"
             alt="">
           <div class="auth-showcase__top">
             <span class="auth-showcase__stamp">Collab Hub &middot; PUB</span>
@@ -182,7 +182,7 @@
           <div class="polaroid__frame">
             <!-- REPLACE PHOTO: Swap with a real photo of a student team collaborating -->
             <img
-              src="https://images.unsplash.com/photo-1758270705290-62b6294dd044?auto=format&amp;fit=crop&amp;w=900&amp;q=80"
+              src="https://cdn.imgpile.com/f/gXB54j1_xl.webp"
               alt="Students gathered around a laptop working on a project" loading="eager">
             <span class="polaroid__stamp">Open Teams</span>
           </div>
@@ -245,16 +245,26 @@
 
             <section class="card workspace__thread" id="workspace" aria-labelledby="thread-title">
               <header class="workspace__head">
-                <div>
+                <div class="workspace__head-main">
                   <p class="eyebrow">Workspace</p>
-                  <h3 id="thread-title">CampusEats &mdash; canteen pre-order app</h3>
+                  <div class="workspace__title-row" id="workspace-title-trigger" role="button" tabindex="0" aria-expanded="false" title="Click to view team members and roles">
+                    <h3 id="thread-title">CampusEats &mdash; canteen pre-order app</h3>
+                    <span class="workspace__chevron" aria-hidden="true">&#9662;</span>
+                  </div>
+                  <p class="workspace__team-subtitle" id="workspace-team-subtitle" hidden></p>
                 </div>
-                <ul class="avatar-stack" aria-label="Team members: Nusrat, Tanvir, Farhana, Rakib">
-                  <li class="avatar" title="Nusrat Rahman">NR</li>
-                  <li class="avatar avatar--accent" title="Tanvir Ahmed">TA</li>
-                  <li class="avatar avatar--gold" title="Farhana Akter">FA</li>
-                  <li class="avatar avatar--info" title="Rakib Hasan">RH</li>
+                <ul class="avatar-stack" id="workspace-avatar-stack" aria-label="Team members" role="button" tabindex="0" title="Click to view team roster">
                 </ul>
+
+                <!-- Expandable team roster shown when clicking the project name -->
+                <div class="workspace__team-drawer" id="workspace-team-drawer" hidden>
+                  <div class="workspace__team-drawer-head">
+                    <span class="micro-title">Project Team</span>
+                    <span class="workspace__team-count" id="workspace-team-count"></span>
+                  </div>
+                  <ul class="workspace__team-roster" id="workspace-team-roster">
+                  </ul>
+                </div>
               </header>
 
               <!-- WORKSPACE_MESSAGES (live via Supabase Realtime) -->

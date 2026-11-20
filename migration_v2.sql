@@ -499,5 +499,106 @@ END;
 $$;
 
 -- ============================================================================
+-- SECTION 12: Team Workspace Dynamic Members & Applications Access
+-- ============================================================================
+
+-- Team members (or applicants) can view accepted applications for their pitch
+DROP POLICY IF EXISTS "Team members can view accepted applications" ON public.pitch_applications;
+CREATE POLICY "Team members can view accepted applications"
+    ON public.pitch_applications FOR SELECT TO authenticated
+    USING (
+        status = 'accepted'
+        AND (
+            EXISTS (
+                SELECT 1 FROM public.project_pitches
+                WHERE project_pitches.id = pitch_applications.pitch_id
+                AND project_pitches.creator_id = auth.uid()
+            )
+            OR EXISTS (
+                SELECT 1 FROM public.pitch_applications my_app
+                WHERE my_app.pitch_id = pitch_applications.pitch_id
+                AND my_app.applicant_id = auth.uid()
+                AND my_app.status = 'accepted'
+            )
+        )
+    );
+
+-- Secure RPC returning team roster (Lead + Accepted Members)
+CREATE OR REPLACE FUNCTION public.get_pitch_team_members(p_pitch_id UUID)
+RETURNS TABLE (
+    user_id UUID,
+    full_name TEXT,
+    department TEXT,
+    avatar_url TEXT,
+    role TEXT,
+    is_lead BOOLEAN
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_is_authorized BOOLEAN;
+BEGIN
+    SELECT (
+        EXISTS (
+            SELECT 1 FROM public.project_pitches
+            WHERE id = p_pitch_id AND creator_id = auth.uid()
+        )
+        OR EXISTS (
+            SELECT 1 FROM public.pitch_applications
+            WHERE pitch_id = p_pitch_id AND applicant_id = auth.uid() AND status = 'accepted'
+        )
+        OR EXISTS (
+            SELECT 1 FROM public.profiles
+            WHERE id = auth.uid() AND is_admin = TRUE
+        )
+    ) INTO v_is_authorized;
+
+    IF NOT v_is_authorized THEN
+        RETURN;
+    END IF;
+
+    -- 1. Project Lead (Creator)
+    RETURN QUERY
+    SELECT
+        p.id AS user_id,
+        COALESCE(p.full_name, 'Project Lead') AS full_name,
+        p.department,
+        p.avatar_url,
+        'Lead'::TEXT AS role,
+        TRUE AS is_lead
+    FROM public.project_pitches pitch
+    JOIN public.profiles p ON p.id = pitch.creator_id
+    WHERE pitch.id = p_pitch_id;
+
+    -- 2. Accepted Teammates
+    RETURN QUERY
+    SELECT
+        p.id AS user_id,
+        COALESCE(p.full_name, 'Teammate') AS full_name,
+        p.department,
+        p.avatar_url,
+        COALESCE(app.role_applied, 'Member')::TEXT AS role,
+        FALSE AS is_lead
+    FROM public.pitch_applications app
+    JOIN public.profiles p ON p.id = app.applicant_id
+    WHERE app.pitch_id = p_pitch_id
+      AND app.status = 'accepted'
+    ORDER BY app.created_at ASC;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_pitch_team_members(UUID) TO authenticated;
+
+-- Ensure pitch_applications table is published to Supabase Realtime
+DO $$
+BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.pitch_applications;
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
+
+-- ============================================================================
 -- END OF MIGRATION V2
 -- ============================================================================
