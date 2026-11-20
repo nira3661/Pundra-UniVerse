@@ -232,6 +232,10 @@
   margin: 0;
 }
 
+dialog {
+  margin: auto;
+}
+
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
@@ -3284,6 +3288,9 @@ fieldset > legend {
    13. Modals (<dialog>)
    --------------------------------------------------------------------- */
 .modal {
+  position: fixed;
+  inset: 0;
+  margin: auto;
   width: min(100% - 2rem, 560px);
   max-width: none;
   max-height: min(100% - 2rem, 880px);
