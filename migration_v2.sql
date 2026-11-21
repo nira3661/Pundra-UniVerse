@@ -1,8 +1,3 @@
--- ============================================================================
--- PUB HUB — MIGRATION V2
--- Idempotent. Paste the entire block into Supabase SQL Editor and run once.
--- Generated: 2026-11-19
--- ============================================================================
 
 -- ============================================================================
 -- SECTION 0: Required Extensions & Reaction Tracking Tables
