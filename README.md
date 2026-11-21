@@ -1,11 +1,11 @@
-# Pundra UniVerse (PUB Hub) 🎓
+# Pundra UniVerse (PUB Hub)
 
 > **Unified Campus Collaboration, Anonymous Feedback & Achievement Portal**  
 > *Crafted for verified students, faculty, and administrators of Pundra University of Science & Technology (PUB), Bogura.*
 
 ---
 
-## 🌟 Overview
+## Overview
 
 **Pundra UniVerse (PUB Hub)** is a lightweight, zero-build, serverless web application engineered to connect campus builders, foster constructive institutional feedback, and broadcast student and faculty milestones.
 
@@ -13,15 +13,15 @@ Built on pure web standards (Semantic HTML5, Modern CSS3, Vanilla ES6+ JavaScrip
 
 ---
 
-## 🚀 Core Modules & Features
+## Core Modules & Features
 
-### 1. 🌟 Student Spotlight (`index.html`)
+### 1. Student Spotlight (`index.html`)
 - **Peer Recognition & Milestones:** Showcase shipped projects, hackathon victories, research publications, and career milestones.
 - **Dynamic Metrics & Counters:** Live monthly milestone counters, active builders metrics, and campus cheers tally dynamically computed from Supabase.
 - **Strict 1-Reaction Server Enforcement:** Atomic `increment_cheer` RPC backed by `achievement_cheers` table ensures each student account can react at most once per post across all devices.
 - **Post Ownership & Moderation:** Authors can edit or delete their milestones with instant feed and stats refresh; administrators possess global delete privileges.
 
-### 2. 🤝 Collab Hub & Team Workspaces (`collab.html`)
+### 2. Collab Hub & Team Workspaces (`collab.html`)
 - **Structured Project Pitches:** Filter pitches by status (Recruiting, Reviewing, Full) and required roles (UI/UX, Frontend, Backend, Mobile, ML/Data).
 - **1-Click Application Pipeline:** Students apply to open positions using their unified Builder Profile; pitch creators review applicant portfolios and accept or decline with a single click.
 - **Real-Time Team Workspaces:** Accepting an applicant automatically unlocks an encrypted workspace containing:
@@ -31,7 +31,7 @@ Built on pure web standards (Semantic HTML5, Modern CSS3, Vanilla ES6+ JavaScrip
   - **Interactive Team Roster Drawer:** Clicking the project name in the top left corner reveals an inline subtitle and expands a clean card grid listing all team members along with their project roles and departments.
 - **Pitch Management:** Project leads can edit their pitch scope/tech stack or delete their pitch; deletion cascades cleanly.
 
-### 3. 🛡️ Anonymous Campus Board (`feedback.html`)
+### 3. Anonymous Campus Board (`feedback.html`)
 - **Constructive Issue Tracking:** Categorized feeds for *Faculty & Grading*, *Labs & Equipment*, *Facilities*, and *Administration*.
 - **Trending & Top-Voted Filter:** Surface pressing campus concerns for department heads and student representatives.
 - **Client-Side Keyword & Profanity Sanitization:** Proactive regex-based filtering blocks profanity, slurs, and individual names prior to submission.
@@ -40,7 +40,7 @@ Built on pure web standards (Semantic HTML5, Modern CSS3, Vanilla ES6+ JavaScrip
 - **Anti-Leak Security Watermark:** Low-opacity, repeating CSS overlay displays the viewer's university email and session timestamp across sensitive boards to deter camera leaks.
 - **Automated Lifecycle Policy:** Posts automatically lock after **20 days** (blocking new votes/edits) and purge after **60 days** unless preserved by an admin (`admin_keep = TRUE`).
 
-### 4. 🏆 Institutional Hall of Fame (`hall-of-fame.html`)
+### 4. Institutional Hall of Fame (`hall-of-fame.html`)
 - **Official University Broadcasts:** Highlights ICPC regionals, government grants, club championships, and research breakthroughs.
 - **Standardized Card Grid Layout:** Announcements render in responsive cards sharing the exact rhythm, typography, and card-grid structure of Collab Hub pitches.
 - **Publisher Role Seals & Verification:** Posts display authenticated departmental seals, official roles, and links to verified contest proofs.
@@ -49,7 +49,7 @@ Built on pure web standards (Semantic HTML5, Modern CSS3, Vanilla ES6+ JavaScrip
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```
                     [ CLIENT BROWSER (Desktop & Mobile) ]
@@ -80,7 +80,7 @@ Built on pure web standards (Semantic HTML5, Modern CSS3, Vanilla ES6+ JavaScrip
 
 ---
 
-## 🔐 Privacy & Security Design
+## Privacy & Security Design
 
 | Feature | Mechanism | Security Guarantee |
 |---|---|---|
@@ -92,7 +92,7 @@ Built on pure web standards (Semantic HTML5, Modern CSS3, Vanilla ES6+ JavaScrip
 
 ---
 
-## 📊 Database Schema Summary
+## Database Schema Summary
 
 ```
    ┌────────────────────┐                   ┌─────────────────────┐
@@ -130,7 +130,7 @@ Built on pure web standards (Semantic HTML5, Modern CSS3, Vanilla ES6+ JavaScrip
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 - **Frontend:** Semantic HTML5, CSS3 (Custom Design System with CSS Variables, Flexbox, Grid), Vanilla JavaScript (ES6+).
 - **Backend / BaaS:** [Supabase](https://supabase.com/)
@@ -142,7 +142,7 @@ Built on pure web standards (Semantic HTML5, Modern CSS3, Vanilla ES6+ JavaScrip
 
 ---
 
-## ⚡ Quick Start & Local Setup
+## Quick Start & Local Setup
 
 ### 1. Clone the Repository
 ```bash
@@ -183,7 +183,7 @@ Visit `http://localhost:8000` in your browser.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 .
@@ -204,7 +204,7 @@ Visit `http://localhost:8000` in your browser.
 
 ---
 
-## 👥 Roles & Permissions
+## Roles & Permissions
 
 - **Verified Student:** Default account created upon registration. Can publish pitches, apply to teams, participate in team workspaces, post milestones, and submit/upvote feedback.
 - **Project Lead:** Pitch creator. Can review applications, accept teammates, and manage project workspace discussions and tasks.
@@ -213,7 +213,7 @@ Visit `http://localhost:8000` in your browser.
 
 ---
 
-## 📄 License & Attribution
+## License & Attribution
 
 Crafted for **Pundra University of Science & Technology (PUB)**.  
 Released under the **MIT License**. Built with pride for student builders and campus community collaboration.
